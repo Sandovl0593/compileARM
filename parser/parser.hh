@@ -28,19 +28,19 @@ public:
 };
 
 // GRAMATICA ARMv7
-// line                 -> data_processing_exp | load_store_exp | branch_exp | decl_label
-// data_processing_exp  -> opcode_dp  reg ',' reg ',' sr2
-// load_store_exp       -> opcode_memory reg ',' '[' reg ',' sr2 ']'
-// sr2                  -> '#' number | reg
-// branch_exp           -> (B | B[cond]) label
-// decl_label           -> label ':'
+// line             -> dp_exp | memory_exp | branch_exp | decl_label
+// dp_exp           -> opcode_dp  reg ',' reg ',' sr2
+// memory_exp       -> opcode_memory reg ',' '[' reg (',' sr2)? ']'
+// sr2              -> '#' number | reg
+// branch_exp       -> (B | B[cond]) label
+// decl_label       -> label ':'
 
-// opcode_dp            -> opcode_dpstat | opcode_dpcond | opcode_dpflags
-// opcode_dpcond        -> opcode_dpstat[cond]
-// opcode_dpstat        -> ADD | SUB | FMUL | AND | ORR | LSL | LSR
-// opcode_dpflags       -> ADDS | SUBS | FMULS
-// opcode_memory        -> LDR | STR
+// opcode_dp        -> opcode_dpstat | opcode_dpcond | opcode_dpflags
+// opcode_dpcond    -> opcode_dpstat[cond]
+// opcode_dpstat    -> ADD | SUB | FMUL | AND | ORR | LSL | LSR
+// opcode_dpflags   -> ADDS | SUBS | FMULS
+// opcode_memory    -> LDR | STR
 
-// cond                 -> EQ | GT | LT | GE | LE | NE
-// reg                  -> [rR](0-9) | [rR](1-9)(0-5)
-// label                -> [a-zA-Z_][a-zA-Z0-9_]*
+// cond             -> EQ | GT | LT | GE | LE | NE
+// reg              -> [rR][0-9] | [rR][1][0-5]
+// label            -> [a-zA-Z_][a-zA-Z0-9_]*

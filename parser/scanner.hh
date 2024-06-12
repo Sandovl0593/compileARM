@@ -41,8 +41,6 @@ void Scanner::init_reserved() {
   r_mnemotics["NE"] = Token::NE;
 }
 
-Scanner::Scanner(const char* s):input(s),first(0),current(0) { }
-
 Scanner::Scanner(string in_s): input(in_s), first(0), current(0) {
   init_reserved();
 }
@@ -111,7 +109,8 @@ Token* Scanner::nextToken() {
         token = new Token(Token::BRANCH);
       } else {
         c3 = nextChar();
-        string mnemote = ""; mnemote += (c2 + c3);
+        string mnemote = "";
+        mnemote += c2; mnemote += c3;
         Token::Mnemonic mne = checkRMnemonic(mnemote);
         if (mne != Token::ERRMNE) {
           token = new Token(Token::BRANCH, mne);
@@ -130,10 +129,11 @@ Token* Scanner::nextToken() {
               token = new Token(Token::REG, getLexema());
             else 
               token = new Token(Token::ERR, c);
-          } else {
-            rollBack();
+          } else if (c == ' ') {
+            rollBack(); rollBack();
             token = new Token(Token::REG, getLexema());
-          }
+          } else
+            token = new Token(Token::ERR, c);
         } else
           token = new Token(Token::REG, getLexema());
       } 
