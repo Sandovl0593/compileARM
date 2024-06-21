@@ -1,48 +1,17 @@
 #include <sstream>
-#include <iostream>
 #include <stdlib.h>
 #include <cstring>
-#include <unordered_map>
 #include <bitset>
 #include <list>
+#include "scanner.hh"
 
 using namespace std;
 
-unordered_map<string, string> commands = {
-  {"ADD" ,"0100"},
-  {"SUB" ,"0010"},
-  {"ORR" ,"1100"},
-  {"AND" ,"0000"},
-  {"FMUL","1111"},
-  {"LSL" ,"1101"},
-  {"LSR" ,"1101"},
-  // {"ASR" ,"1101"},
-  // {"ROR" ,"1101"}
-};
-
-unordered_map<string, string> conditions = {
-  {"EQ", "0000"},
-  {"NE", "0001"},
-  {"CS", "0010"},
-  {"CC", "0011"},
-  {"MI", "0100"},
-  {"PL", "0101"},
-  {"VS", "0110"},
-  {"VC", "0111"},
-  {"HI", "1000"},
-  {"LS", "1001"},
-  {"GE", "1010"},
-  {"LT", "1011"},
-  {"GT", "1100"},
-  {"LE", "1101"},
-  {"UNCOND", "1110"}
-};
-
-unordered_map<string, string> shift = {
-  {"LSL", "00"},
-  {"LSR", "01"},
-  // {"ASR", "10"},
-  // {"ROR", "11"}
+class Instr {
+public:
+  virtual string getARMcode() = 0;
+  virtual string getMachineCode() = 0;
+  virtual ~Instr() {}
 };
 
 class LineList {
@@ -73,13 +42,6 @@ public:
 
 };
 
-class Instr {
-public:
-  virtual string getARMcode() = 0;
-  virtual string getMachineCode() = 0;
-  virtual ~Instr() {}
-};
-
 class DpInst : public Instr {
 public:
   string cmd;
@@ -93,7 +55,7 @@ public:
   
   string getARMcode() {
     stringstream ss;
-    ss << cmd << (cond!=""?cond:"") << (flags?"S":"") << " " << rd << ", " << rn << ", " << sr2;
+    ss << "  " << cmd << (cond!=""?cond:"") << (flags?"S":"") << " " << rd << ", " << rn << ", " << sr2;
     return ss.str();
   }
   string getMachineCode() {
@@ -111,8 +73,8 @@ public:
       int sr2_ = sr2;
       int rot = 0;
       while (sr2_ > 255) {
-        sr2_ = (sr2_ >> 2) | (sr2_ << 6);
-        rot++;
+        sr2_ = sr2_ >> 2;
+        rot += 1;
       }
       ss << bitset<4>(rot).to_string(); // rotation
       ss << bitset<8>(sr2_).to_string(); // sr2
@@ -122,6 +84,7 @@ public:
       ss << "000"; // default
       ss << bitset<5>(sr2).to_string(); // rm
     }
+    return ss.str();
   }
   ~DpInst() {}
 };
@@ -138,7 +101,7 @@ public:
   
   string getARMcode() {
     stringstream ss;
-    ss << cmd << (cond!=""?cond:"") << " " << rd << ", [" << rn << ", " << offset << "]";
+    ss << "  "  << cmd << (cond!=""?cond:"") << " " << rd << ", [" << rn << ", " << offset << "]";
     return ss.str();
   }
   string getMachineCode() {
@@ -159,8 +122,8 @@ public:
       ss << bitset<12>(offset).to_string(); // offset
     } else {
       // register without shift
-      ss << "0000";                         // no shift
-      ss << "001";                          // shift
+      ss << "00000";                        // no shift
+      ss << "001";                          // default
       ss << bitset<4>(offset).to_string();  // rm
     }
     return ss.str();
@@ -186,7 +149,7 @@ public:
   BranchInst(string cond, string label, int count_pos_instr): cond(cond), label(label), count_pos_instr(count_pos_instr) {}
   
   string getARMcode() {
-    return "B " + label;
+    return "  B " + label;
   }
   string getMachineCode() {
     stringstream ss;

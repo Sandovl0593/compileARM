@@ -6,6 +6,7 @@ class Scanner {
 public:
     Scanner(const char* in_s);
     Scanner(string in_s);
+    void reset();
     Token* nextToken();
     ~Scanner();
 private:
@@ -48,6 +49,8 @@ Scanner::Scanner(string in_s): input(in_s), first(0), current(0) {
 Scanner::Scanner(const char* in_s): input(in_s), first(0), current(0) {
   init_reserved();
 }
+
+void Scanner::reset() { current = 0; first = 0; input = ""; }
 
 Token::Type Scanner::checkReserved(string lexema) {
   std::unordered_map<std::string,Token::Type>::const_iterator it = reserved.find(lexema);
@@ -145,27 +148,26 @@ Token* Scanner::nextToken() {
       while (isalpha(c) || isdigit(c) || c=='_') c = nextChar();
       rollBack();
       string lex = getLexema();
-      if (lex.size() >= 3) {
-        string inst = lex.substr(0,3);
-        Token::Type ttype = checkReserved(inst);
-        if (ttype == Token::ERR) {
-          token = new Token(Token::LABEL, lex);
-        } 
-        else if (lex.size() == 5) {
-          // check if exists a condition mnemonic
-          string cond = lex.substr(3,2);
-          Token::Mnemonic mne = checkRMnemonic(cond);
-          if (mne != Token::ERRMNE) {
-            token = new Token(ttype, inst, mne);
-          } else {
-            token = new Token(Token::LABEL, lex);
-          }
-        } 
+      int size_lex = lex.size();
+      // dividir lex en dos partes para ver si es un mnemonico
+      string cmd = lex.substr(lex.size()-1, 1);
+      Token::Type cmd_t = checkReserved(cmd);
+      if (size_lex > 4) {
+        // si tiene mnemonico
+        string mnem = lex.substr(0, size_lex-2);
+        Token::Mnemonic mne_t = checkRMnemonic(lex);
+        if (mne_t != Token::ERRMNE) {
+          token = new Token(cmd_t, mne_t);
+        } else {
+          token = new Token(Token::ERR, lex);
+        }
+      } else {
+        // si no tiene mnemonico
+        if (cmd_t != Token::ERR)
+          token = new Token(cmd_t);
         else
           token = new Token(Token::LABEL, lex);
       }
-      else
-       token = new Token(Token::LABEL, lex);
     }
   }
   else {
