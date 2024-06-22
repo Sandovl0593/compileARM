@@ -1,4 +1,5 @@
 #include <sstream>
+#include <fstream>
 #include <iostream>
 
 #include "parser.hh"
@@ -9,14 +10,17 @@ int main(int argc, const char* argv[]) {
   bool useparser = true;
   LineList *program; 
   
-    if (argc != 2) {
-      cout << "Incorrect number of arguments" << endl;
-      exit(1);
-    }
-
-    Scanner scanner(argv[1]);
-    Parser parser(&scanner);
-    program = parser.parse();  // el parser construye el AST de Program
+   if (argc != 2) {
+    cout << "Incorrect number of arguments" << endl;
+    exit(1);
+  }
+ 
+  std::ifstream t(argv[1]);
+  std::stringstream buffer;
+  buffer << t.rdbuf();
+  Scanner scanner(buffer.str());
+  Parser parser(&scanner);
+  program = parser.parse();  // el parser construye el AST de Program
 
   cout << "program in ARM: " << endl;
   program->getARMcode();

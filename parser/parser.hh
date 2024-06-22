@@ -22,7 +22,7 @@ private:
   Instr* parseDpInstr(bool flags);
   Instr* parseMemoryInstr();
   Instr* parseBranchInstr();
-  void parseDeclLabel();
+  string parseDeclLabel();
 
 public:
   Parser(Scanner* scanner);
@@ -79,14 +79,14 @@ void Parser::loadBranches() {
   if (check(Token::ERR)) {
     cout << "Error - caracter invalido" << endl; exit(0);
   }
-  while (match(Token::SEMICOLON)) {
+  do {
     if (match(Token::LABEL)) {
-      string label = previous->lexema;
-      if (!match(Token::TPOINTS)) parserError("Se esperaba ':'");
-      decLabels[label] = linePos;
-    } else
+      string label = parseDeclLabel();
+      decLabels[label] = linePos + 1;
+    } else {
       parseLine();
-  }
+    }
+  } while (match(Token::SEMICOLON));
   if (current->type != Token::END) {
     cout << "Esperaba EOinput, se encontro " << current << endl; exit(0);
   }
@@ -119,7 +119,7 @@ LineList* Parser::parseProgram() {
 
 Instr* Parser::parseLine() {
   Instr* line = NULL;
-  if (match(Token::BRANCH)) {
+  if (match(Token::B)) {
     line = parseBranchInstr();
   } else if (match(Token::LDR) || match(Token::STR)) {
     line = parseMemoryInstr();
@@ -130,9 +130,6 @@ Instr* Parser::parseLine() {
     line = parseDpInstr(true);
   } else if (match(Token::LABEL)) {
     parseDeclLabel();
-  } 
-  else {
-    parserError("Se esperaba instruccion");
   }
   return line;
 }
@@ -140,13 +137,13 @@ Instr* Parser::parseLine() {
 Instr* Parser::parseDpInstr(bool flags) {
   Token::Type opcode = previous->type;
   Token::Mnemonic condit = previous->mnemonic;
-  if (!match(Token::REG)) parserError("Se esperaba registro");
+  if (!match(Token::REG)) parserError("Se esperaba rd");
   int reg1 = stoi(previous->lexema);
   if (!match(Token::COMMA)) parserError("Se esperaba ','");
-  if (!match(Token::REG)) parserError("Se esperaba registro");
+  if (!match(Token::REG)) parserError("Se esperaba rn");
   int reg2 = stoi(previous->lexema);
   if (!match(Token::COMMA)) parserError("Se esperaba ','");
-  if (match(Token::NUMERAL) || match(Token::DNUM) || match(Token::HEXNUM) || match(Token::REG)) {
+  if (match(Token::DNUM) || match(Token::HEXNUM) || match(Token::REG)) {
     int sr2 = stoi(previous->lexema);
     bool inmed = previous->type!=Token::REG;
     if (condit != Token::UNCOND) {
@@ -162,14 +159,14 @@ Instr* Parser::parseDpInstr(bool flags) {
 Instr* Parser::parseMemoryInstr() {
   Token::Type opcode = previous->type;
   Token::Mnemonic condit = previous->mnemonic;
-  if (!match(Token::REG)) parserError("Se esperaba registro");
+  if (!match(Token::REG)) parserError("Se esperaba rd");
   int reg1 = stoi(previous->lexema);
   if (!match(Token::COMMA)) parserError("Se esperaba ','");
   if (!match(Token::LCOR)) parserError("Se esperaba '['");
-  if (!match(Token::REG)) parserError("Se esperaba registro");
+  if (!match(Token::REG)) parserError("Se esperaba rn");
   int reg2 = stoi(previous->lexema);
   if (!match(Token::COMMA)) parserError("Se esperaba ','");
-  if (match(Token::NUMERAL) || match(Token::DNUM) || match(Token::HEXNUM) || match(Token::REG)) {
+  if (match(Token::DNUM) || match(Token::HEXNUM) || match(Token::REG)) {
     int sr2 = stoi(previous->lexema);
     bool inmed = previous->type!=Token::REG;
     if (condit != Token::UNCOND) {
@@ -184,18 +181,20 @@ Instr* Parser::parseMemoryInstr() {
 
 Instr* Parser::parseBranchInstr() {
   Token::Mnemonic condit = previous->mnemonic;
-  if (!match(Token::LABEL)) parserError("Se esperaba etiqueta");
+  if (!match(Token::LABEL)) parserError("Se esperaba label");
   string label = previous->lexema;
+  cout << label << endl;
   if (condit != Token::UNCOND) {
     return new BranchInst(CToStr[condit], label, decLabels[label] - (linePos + 2));
   }
   return new BranchInst("UNCOND", label, decLabels[label] - (linePos + 2));
 }
 
-void Parser::parseDeclLabel() {
+string Parser::parseDeclLabel() {
   string label = previous->lexema;
   if (!match(Token::TPOINTS)) parserError("Se esperaba ':'");
   linePos--; // no considerar como linea
+  return label;
 }
 
  
