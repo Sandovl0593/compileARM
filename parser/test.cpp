@@ -1,33 +1,25 @@
-#include <sstream>
-#include <fstream>
-#include <iostream>
 
 #include "parser.hh"
 using namespace std;
 
 int main(int argc, const char* argv[]) {
-
-  bool useparser = true;
-  LineList *program; 
   
-   if (argc != 2) {
+  if (argc != 2) {
     cout << "Incorrect number of arguments" << endl;
     exit(1);
   }
  
-  std::ifstream t(argv[1]);
+  string file = argv[1];
+  std::ifstream t("parser/" + file + ".asm");
+  std::ofstream out("src/" + file + ".mem");
   std::stringstream buffer;
   buffer << t.rdbuf();
   Scanner scanner(buffer.str());
   Parser parser(&scanner);
-  program = parser.parse();  // el parser construye el AST de Program
 
   cout << "program in ARM: " << endl;
-  program->getARMcode();
-  cout << endl;
-  cout << "program in machine code: " << endl;
-  program->getMachineCode();
-
-  delete program;
+  parser.parse(out);  // el parser construye el AST de Program
+  cout << "Machine code generated in " << file << ".mem" << endl;
+  out.close();
 
 }
