@@ -1,15 +1,20 @@
 // for Ikarus
-// `include "imem.v"
-// `include "arm.v"
-// `include "dmem.v"
+`include "src/arm.v"
+`include "src/mem.v"
 
 module top (
-    input wire clk,
-    input wire reset,
-    output wire [31:0] WriteData,
-    output wire [31:0] DataAdr,
-    output wire MemWrite
+    clk,
+    reset,
+    WriteData,
+    Adr,
+    MemWrite
 );
+    input wire clk;
+    input wire reset;
+    output wire [31:0] WriteData;
+    output wire [31:0] Adr;
+    output wire MemWrite;
+
     wire [31:0] PC;
     wire [31:0] Instr;
     wire [31:0] ReadData;
@@ -17,23 +22,16 @@ module top (
     arm arm(
         .clk(clk),
         .reset(reset),
-        .Instr(Instr),
-        .ReadData(ReadData),
-        
-        .PC(PC), // out all wire
         .MemWrite(MemWrite),
-        .ALUResult(DataAdr),
-        .WriteData(WriteData)
+        .Adr(Adr),
+        .WriteData(WriteData),
+        .ReadData(ReadData)
     );
-    imem imem(
-        .a(PC),
-        .rd(Instr) // out wire
-    );
-    dmem dmem(
+    mem mem(
         .clk(clk),
         .we(MemWrite),
-        .a(DataAdr),
+        .a(Adr),
         .wd(WriteData),
-        .rd(ReadData) // out wire
+        .rd(ReadData)
     );
 endmodule

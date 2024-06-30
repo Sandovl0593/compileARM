@@ -1,27 +1,25 @@
-`timescale 1ns / 1ps
+`include "src/top.v"
 
 module testbench;
     reg clk;
     reg reset;
     wire [31:0] WriteData;
-    wire [31:0] DataAdr;
+    wire [31:0] Adr;
     wire MemWrite;
 
     top dut(
         .clk(clk),
         .reset(reset),
-        .WriteData(WriteData), // out wire
-        .DataAdr(DataAdr), // out wire
-        .MemWrite(MemWrite)	// out wire
+        .WriteData(WriteData),
+        .Adr(Adr),
+        .MemWrite(MemWrite)
     );
-
     initial begin
         reset <= 1;
         #(22)
             ;
         reset <= 0;
     end
-
     always begin
         clk <= 1;
         #(5)
@@ -30,20 +28,19 @@ module testbench;
         #(5)
             ;
     end
-
     always @(negedge clk)
         if (MemWrite)
-            if ((DataAdr === 100) & (WriteData === 7)) begin
+            if ((Adr === 100) & (WriteData === 7)) begin
                 $display("Simulation succeeded");
                 $stop;
             end
-            else if (DataAdr !== 96) begin
+            else if (Adr !== 96) begin
                 $display("Simulation failed");
                 $stop;
             end
-
+            
     initial begin
-        $dumpfile("testbench.vcd");
+        $dumpfile("output.vcd");
         $dumpvars;
-        end
+    end
 endmodule

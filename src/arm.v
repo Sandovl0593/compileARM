@@ -1,59 +1,71 @@
 // for Ikarus
-// `include "controller.v"
-// `include "datapath.v"
+`include "src/controller.v"
+`include "src/datapath.v"
 
 module arm (
-    input wire          clk,
-    input wire          reset,
-    input wire [31:0]   ReadData
-    input wire [31:0]   Instr,
-
-    output wire [31:0]  PC,
-    output wire         MemWrite,
-    output wire [31:0]  ALUResult,
-    output wire [31:0]  WriteData,
+    clk,
+    reset,
+    MemWrite,
+    Adr,
+    WriteData,
+    ReadData
 );
+    input wire clk;
+    input wire reset;
+
+    output wire MemWrite;
+    output wire [31:0] Adr;
+    output wire [31:0] WriteData;
+
+    input wire [31:0] ReadData;
+    wire [31:0] Instr;
     wire [3:0] ALUFlags;
+    wire PCWrite;
     wire RegWrite;
-    wire ALUSrc;
-    wire MemtoReg;
-    wire PCSrc;
+    wire IRWrite;
+    wire AdrSrc;
     wire [1:0] RegSrc;
+    wire [1:0] ALUSrcA;
+    wire [1:0] ALUSrcB;
     wire [1:0] ImmSrc;
     wire [1:0] ALUControl;
-    
+    wire [1:0] ResultSrc;
+
     controller c(
         .clk(clk),
         .reset(reset),
         .Instr(Instr[31:12]),
         .ALUFlags(ALUFlags),
-
-        .RegSrc(RegSrc), // out all wire
-        .RegWrite(RegWrite),
-        .ImmSrc(ImmSrc),
-        .ALUSrc(ALUSrc),
-        .ALUControl(ALUControl),
+        .PCWrite(PCWrite),
         .MemWrite(MemWrite),
-        .MemtoReg(MemtoReg),
-        .PCSrc(PCSrc)
+        .RegWrite(RegWrite),
+        .IRWrite(IRWrite),
+        .AdrSrc(AdrSrc),
+        .RegSrc(RegSrc),
+        .ALUSrcA(ALUSrcA),
+        .ALUSrcB(ALUSrcB),
+        .ResultSrc(ResultSrc),
+        .ImmSrc(ImmSrc),
+        .ALUControl(ALUControl)
     );
+    
     datapath dp(
         .clk(clk),
         .reset(reset),
-        .RegSrc(RegSrc),
-        .RegWrite(RegWrite),
-        .ImmSrc(ImmSrc),
-        .ALUSrc(ALUSrc),
-        .ALUControl(ALUControl),
-        .MemtoReg(MemtoReg),
-        .PCSrc(PCSrc),
-
-        .Instr(Instr),
+        .Adr(Adr),
+        .WriteData(WriteData),
         .ReadData(ReadData),
-
-        .ALUFlags(ALUFlags), // out all wire
-        .PC(PC),
-        .ALUResult(ALUResult),
-        .WriteData(WriteData)
+        .Instr(Instr),
+        .ALUFlags(ALUFlags),
+        .PCWrite(PCWrite),
+        .RegWrite(RegWrite),
+        .IRWrite(IRWrite),
+        .AdrSrc(AdrSrc),
+        .RegSrc(RegSrc),
+        .ALUSrcA(ALUSrcA),
+        .ALUSrcB(ALUSrcB),
+        .ResultSrc(ResultSrc),
+        .ImmSrc(ImmSrc),
+        .ALUControl(ALUControl)
     );
 endmodule

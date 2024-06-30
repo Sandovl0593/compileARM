@@ -1,107 +1,187 @@
 // for Ikarus
-// `include "mux2.v"
-// `include "flopr.v"
-// `include "adder.v"
-// `include "regfile.v"
-// `include "extend.v"
-// `include "alu.v"
+`include "src/mux2.v"
+`include "src/mux3.v"
+`include "src/regfile.v"
+`include "src/extend.v"
+`include "src/alu.v"
 
 module datapath (
-    input wire          clk,
-    input wire          reset,
-    input wire [1:0]    RegSrc,
-    input wire          RegWrite,
-    input wire [1:0]    ImmSrc,
-    input wire          ALUSrc,
-    input wire [1:0]    ALUControl,
-    input wire          MemtoReg,
-    input wire          PCSrc,
-
-    input wire [31:0] Instr,
-    input wire [31:0] ReadData,
-
-    output wire [3:0]   ALUFlags,
-    output wire [31:0]  PC,
-    output wire [31:0]  ALUResult,
-    output wire [31:0]  WriteData
+    clk,
+    reset,
+    Adr,
+    WriteData,
+    ReadData,
+    Instr,
+    ALUFlags,
+    PCWrite,
+    RegWrite,
+    IRWrite,
+    AdrSrc,
+    RegSrc,
+    ALUSrcA,
+    ALUSrcB,
+    ResultSrc,
+    ImmSrc,
+    ALUControl
 );
+    input wire clk;
+    input wire reset;
+
+    output wire [31:0] Adr;
+    output wire [31:0] WriteData;
+
+    input wire [31:0] ReadData;
+
+    output wire [31:0] Instr;
+    output wire [3:0] ALUFlags;
+
+    input wire PCWrite;
+    input wire RegWrite;
+    input wire IRWrite;
+    input wire AdrSrc;
+    input wire [1:0] RegSrc;
+    input wire [1:0] ALUSrcA;
+    input wire [1:0] ALUSrcB;
+    input wire [1:0] ResultSrc;
+    input wire [1:0] ImmSrc;
+    input wire [1:0] ALUControl;
+
     wire [31:0] PCNext;
-    wire [31:0] PCPlus4;
-    wire [31:0] PCPlus8;
+    wire [31:0] PC;
     wire [31:0] ExtImm;
     wire [31:0] SrcA;
     wire [31:0] SrcB;
     wire [31:0] Result;
+    wire [31:0] Data;
+    wire [31:0] RD1;
+    wire [31:0] RD2;
+    wire [31:0] A;
+    wire [31:0] ALUResult;
+    wire [31:0] ALUOut;
     wire [3:0] RA1;
     wire [3:0] RA2;
 
-    mux2 #(32) pcmux(
-        .d0(PCPlus4),
-        .d1(Result),
-        .s(PCSrc),
-        .y(PCNext) // out wire
+    // Your datapath hardware goes below. Instantiate each of the 
+    // submodules that you need. Remember that you can reuse hardware
+    // from previous labs. Be sure to give your instantiated modules 
+    // applicable names such as pcreg (PC register), adrmux 
+    // (Address Mux), etc. so that your code is easier to understand.
+
+    // ADD CODE HERE
+    // next PC logic
+    flopenr #(32) pcreg(
+        clk, 
+        reset, 
+        PCWrite, 
+        Result, 
+        PC
+    );    
+    // memory logic
+    mux2 #(32) adrmux(
+        PC, 
+        ALUOut, 
+        AdrSrc, 
+        Adr
     );
-    flopr #(32) pcreg(
-        .clk(clk),
-        .reset(reset),
-        .d(PCNext),
-        .q(PC) // out reg
+
+    flopenr #(32) ir(
+        clk, 
+        reset, 
+        IRWrite, 
+        ReadData, 
+        Instr
     );
-    adder #(32) pcadd1(
-        .a(PC),
-        .b(32'b100),
-        .y(PCPlus4) // out wire
+
+    flopr #(32) datareg(
+        clk, 
+        reset, 
+        ReadData, 
+        Data
     );
-    adder #(32) pcadd2(
-        .a(PCPlus4),
-        .b(32'b100),
-        .y(PCPlus8) // out wire
-    );
+
+     // register file logic
     mux2 #(4) ra1mux(
-        .d0(Instr[19:16]),
-        .d1(4'b1111),
-        .s(RegSrc[0]),
-        .y(RA1) // out wire
+        Instr[19:16], 
+        4'b1111, 
+        RegSrc[0], 
+        RA1
     );
+
     mux2 #(4) ra2mux(
-        .d0(Instr[3:0]),
-        .d1(Instr[15:12]),
-        .s(RegSrc[1]),
-        .y(RA2) // out wire
+        Instr[3:0], 
+        Instr[15:12], 
+        RegSrc[1], 
+        RA2
     );
+
     regfile rf(
-        .clk(clk),
-        .we3(RegWrite),
-        .ra1(RA1),
-        .ra2(RA2),
-        .wa3(Instr[15:12]),
-        .wd3(Result),
-        .r15(PCPlus8),
-        .rd1(SrcA), // out wire
-        .rd2(WriteData) // out wire
+        clk, 
+        RegWrite, 
+        RA1, 
+        RA2,
+        Instr[15:12], 
+        Result, 
+        Result,
+        RD1, 
+        RD2
     );
-    mux2 #(32) resmux(
-        .d0(ALUResult),
-        .d1(ReadData),
-        .s(MemtoReg),
-        .y(Result) // out wire
+
+    flopr #(32) srcareg(
+        clk, 
+        reset, 
+        RD1, 
+        A
     );
+
+    flopr #(32) wdreg(
+        clk, 
+        reset, 
+        RD2, 
+        WriteData
+    );    
     extend ext(
-        .Instr(Instr[23:0]),
-        .ImmSrc(ImmSrc),
-        .ExtImm(ExtImm) // out reg
+        Instr[23:0], 
+        ImmSrc, 
+        ExtImm
     );
-    mux2 #(32) srcbmux(
-        .d0(WriteData),
-        .d1(ExtImm),
-        .s(ALUSrc),
-        .y(SrcB) // out wire
+
+    // ALU logic
+    mux3 #(32) srcamux(
+        A,
+        PC,
+        ALUOut,
+        ALUSrcA,
+        SrcA
     );
+
+    mux3 #(32) srcbmux(
+        WriteData, 
+        ExtImm, 
+        32'd4, 
+        ALUSrcB, 
+        SrcB
+    );
+
     alu alu(
-        .a(SrcA),
-        .b(SrcB),
-        .ALUControl(ALUControl),
-        .Result(ALUResult), // out reg
-        .ALUFlags(ALUFlags) // out wire
+        SrcA, 
+        SrcB, 
+        ALUControl, 
+        ALUResult, 
+        ALUFlags
+    );    
+    flopr #(32) aluoutreg(
+        clk, 
+        reset, 
+        ALUResult,
+        ALUOut
     );
+
+    mux3 #(32) resmux(
+        ALUOut, 
+        Data, 
+        ALUResult, 
+        ResultSrc, 
+        Result
+    );
+
 endmodule
