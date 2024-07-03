@@ -1,7 +1,3 @@
-// for Ikarus
-`include "src/arm.v"
-`include "src/mem.v"
-
 module top (
     clk,
     reset,

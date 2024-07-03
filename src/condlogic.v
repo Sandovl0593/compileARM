@@ -1,8 +1,3 @@
-// for Ikarus
-`include "src/flopenr.v"
-`include "src/flopr.v"
-`include "src/condcheck.v"
-
 module condlogic (
     clk,
     reset,

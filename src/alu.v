@@ -1,7 +1,7 @@
 module alu (
     input [31:0]        a,
     input [31:0]        b,
-    input [1:0]         ALUControl,
+    input [2:0]         ALUControl,
     output reg [31:0]   Result,
     output wire [3:0]   ALUFlags
 );

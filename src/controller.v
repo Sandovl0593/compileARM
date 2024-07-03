@@ -1,7 +1,3 @@
-// for Ikarus
-`include "src/decode.v"
-`include "src/condlogic.v"
-
 module controller (
     clk,
     reset,

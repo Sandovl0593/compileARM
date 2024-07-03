@@ -1,7 +1,3 @@
-// for Ikarus
-`include "src/controller.v"
-`include "src/datapath.v"
-
 module arm (
     clk,
     reset,

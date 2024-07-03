@@ -9,7 +9,7 @@ module mem (
 
     reg [31:0] RAM [63:0];
     
-    initial $readmemh("src/memfile.mem", RAM);
+    initial $readmemh("memfile_ex.dat", RAM);
     assign rd = RAM[a[31:2]]; // word aligned
     always @(posedge clk)
         if (we)

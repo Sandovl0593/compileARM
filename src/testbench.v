@@ -1,5 +1,3 @@
-`include "src/top.v"
-
 module testbench;
     reg clk;
     reg reset;
@@ -39,8 +37,8 @@ module testbench;
                 $stop;
             end
             
-    initial begin
-        $dumpfile("output.vcd");
-        $dumpvars;
-    end
+    // initial begin
+    //    $dumpfile("output.vcd");
+    //    $dumpvars;
+    // end
 endmodule

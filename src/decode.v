@@ -1,5 +1,3 @@
-`include "src/mainfsm.v"
-
 module decode (
     clk,
     reset,
