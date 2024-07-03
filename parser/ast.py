@@ -1,17 +1,29 @@
 from typing import TextIO
 
-# --------- codes for ARM instructions ---------
+# --------- encoding for ARM instructions ---------
 commands = {
-    "ADD" :"0100",
-    "ADDS":"0100",
-    "SUB" :"0010",
-    "SUBS":"0010",
-    "ORR" :"1100",
-    "AND" :"0000",
-    "FMUL":"1111",
+    # arithmetic
+    "ADD"  :"0100",
+    "ADDS" :"0100",
+    "FADD" :"0100",
+    "FADDS":"0100",
+    "FMUL" :"1111",
     "FMULS":"1111",
-    "LSL" :"1101",
-    "LSR" :"1101",
+    "SUB"  :"0010",
+    "SUBS" :"0010",
+    "FSUB" :"0010",
+    "FSUBS":"0010",
+    "CMP"  :"1010",
+    # bitwise
+    "RSB"  :"0011",
+    "RSBS" :"0011",
+    "ORR"  :"1100",
+    "AND"  :"0000",
+    "EOR"  :"0001",
+    "XOR"  :"0001",
+    # shift
+    "LSL"  :"1101",
+    "LSR"  :"1101",
 }
 
 conditions = {
@@ -49,7 +61,7 @@ class DpInst(Instr):
         os.write("00")                            # op
         os.write("1" if self.inmediate else "0")  # I
         os.write(commands[self.cmd])               # cmd
-        os.write("1" if self.flags else "0")       # S
+        os.write("1" if self.flags or self.cmd == "CMP" else "0")       # S
         os.write(format(self.rn, '04b'))           # Rn
         os.write(format(self.rd, '04b'))           # Rd
 
@@ -64,9 +76,10 @@ class DpInst(Instr):
             os.write(format(sr2_, '08b')) # sr2
         else:
             # register without shift
-            os.write("0000") # no shift
-            os.write("000") # default
-            os.write(format(self.sr2, '05b')) # rm
+            os.write("00000")                    # shamnt
+            os.write("00")                       # no shift
+            os.write("0")                           # default
+            os.write(format(self.sr2, '04b')) # rm
         os.write("\n")
     
     def __del__(self):
@@ -101,10 +114,11 @@ class MemoryInst(Instr):
             os.write(format(self.offset, '012b')) # offset
         else:
             # register without shift
-            os.write("00000")                        # no shift
-            os.write("001")                          # default
+            os.write("00000")                        # shamnt
+            os.write("00")                          # no shift
+            os.write("1")                           # default
             os.write(format(self.offset, '04b'))     # rm
-        os.write("\n")
+        os.write("\n")  
     
     def __del__(self):
         pass

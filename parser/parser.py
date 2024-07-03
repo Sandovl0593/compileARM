@@ -30,6 +30,9 @@ class Parser:
             if self.check(Token.ERR):
                 print("Parse error, unrecognised character: " + self.current.lexema)
                 exit(0)
+            elif self.check(Token.LOGERR):
+                print("Error - asignacion invalida")
+                exit(0)
             return True
         return False
 
@@ -43,6 +46,9 @@ class Parser:
     def loadBranches(self, os: TextIO):
         if self.check(Token.ERR):
             print("Error - caracter invalido")
+            exit(0)
+        elif self.check(Token.LOGERR):
+            print("Error - asignacion invalida")
             exit(0)
 
         if self.match(Token.LABEL):

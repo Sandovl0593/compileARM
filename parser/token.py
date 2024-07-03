@@ -24,6 +24,34 @@ class Token(Enum):
         return self.value
 
 
+class FToken(Enum):
+    FADD32 = 1; FADD32EQ = 2; FADD32NE = 3; FADD32GT = 4; FADD32GE = 5; FADD32LT = 6; FADD32LE = 7
+    FMUL32 = 8; FMUL32EQ = 9; FMUL32NE = 10; FMUL32GT = 11; FMUL32GE = 12; FMUL32LT = 13; FMUL32LE = 14
+    FADD64 = 15; FADD64EQ = 16; FADD64NE = 17; FADD64GT = 18; FADD64GE = 19; FADD64LT = 20; FADD64LE = 21
+    FMUL64 = 22; FMUL64EQ = 23; FMUL64NE = 24; FMUL64GT = 25; FMUL64GE = 26; FMUL64LT = 27; FMUL64LE = 28
+
+    def __str__(self):
+        return self.name.upper()
+    
+    def __int__(self):
+        return self.value
+
+
+class VecToken(Enum):
+    VADD = 1; VADDEQ = 2; VADDNE = 3; VADDGT = 4; VADDGE = 5; VADDLT = 6; VADDLE = 7
+    VSUB = 8; VSUBEQ = 9; VSUBNE = 10; VSUBGT = 11; VSUBGE = 12; VSUBLT = 13; VSUBLE = 14
+    VMUL = 15; VMULEQ = 16; VMULNE = 17; VMULGT = 18; VMULGE = 19; VMULLT = 20; VMULLE = 21
+    VAND = 22; VANDEQ = 23; VANDNE = 24; VANDGT = 25; VANDGE = 26; VANDLT = 27; VANDLE = 28
+    VORR = 29; VORREQ = 30; VORRNE = 31; VORRGT = 32; VORRGE = 33; VORRLT = 34; VORRLE = 35
+    VXOR = 36; VXOREQ = 37; VXORNE = 38; VXORGT = 39; VXORGE = 40; VXORLT = 41; VXORLE = 42
+
+    def __str__(self):
+        return self.name.upper()
+    
+    def __int__(self):
+        return self.value
+
+
 class Mnemonic(Enum):
     UNCOND = 0; EQ = 1; NE = 2; GT = 3; GE = 4; LT = 5; LE = 6
 

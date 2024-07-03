@@ -9,8 +9,8 @@ if (__name__ == '__main__'):
 
     # open file
     file = sys.argv[1]
-    t = open("parser/" + file + ".asm", "r")
-    out = open("src/memfile_bin.mem", "w")
+    t = open(file + ".asm", "r")
+    out = open("src/memfile_bin.dat", "w")
     buffer = t.read()
     
     scanner = Scanner(buffer)
@@ -19,14 +19,14 @@ if (__name__ == '__main__'):
     # parse and generate binary code
     print("program in ARM: \n")
     parser.parse(out)
-    print("\nBinary code generated in memfile_bin.mem")
+    print("\nBinary code generated in memfile_bin.dat")
     out.close()
     t.close()
 
     # convert to hexadecimal code
-    f = open("src/memfile_bin.mem", "r")
+    f = open("src/memfile_bin.dat", "r")
     lines = f.readlines()
-    final = open("src/memfile.mem", "w")
+    final = open("src/memfile.dat", "w")
 
     for line in lines:
         hexnum = hex(int(line, 2)).upper()[2:]
@@ -34,6 +34,6 @@ if (__name__ == '__main__'):
             hexnum = "0" * (8 - len(hexnum)) + hexnum
         final.write(hexnum + '\n')
 
-    print("Hexadecimal code in memfile.mem")
+    print("\nHexadecimal code in memfile.dat")
     f.close()
     final.close()

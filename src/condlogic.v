@@ -30,46 +30,49 @@ module condlogic (
     output wire PCWrite;
     output wire RegWrite;
     output wire MemWrite;
-    
     wire [1:0] FlagWrite;
     wire [3:0] Flags;
-    wire CondEx , CondExDelayed; //Se agrega CondExDelayed
-    
-    // ADD CODE HERE
+    wire CondEx;
+    wire PostCondEx;
 
+    // Delay writing flags until ALUWB state
+    flopr #(2) flagwritereg(
+        clk,
+        reset,
+        FlagW & {2 {CondEx}},
+        FlagWrite
+    );
+    
+    
+    flopr #(2) postCondex(
+       clk,
+       reset,
+       CondEx,
+       PostCondEx
+    );
     flopenr #(2) flagreg1(
-        clk, 
-        reset, 
-        FlagWrite[1], 
-        ALUFlags[3:2],
-        Flags[3:2]
+        .clk(clk),
+        .reset(reset),
+        .en(FlagWrite[1]),
+        .d(ALUFlags[3:2]),
+        .q(Flags[3:2])
+    );
+    flopenr #(2) flagreg0(
+        .clk(clk),
+        .reset(reset),
+        .en(FlagWrite[0]),
+        .d(ALUFlags[1:0]),
+        .q(Flags[1:0])
+    );
+    condcheck cc(
+        .Cond(Cond),
+        .Flags(Flags),
+        .CondEx(CondEx)
     );
     
-    flopenr #(2) flagreg0( 
-        clk, 
-        reset, 
-        FlagWrite[0], 
-        ALUFlags[1:0],
-        Flags[1:0]
-    );
-
-    //Señales de control agregadas
-    condcheck cc(
-        Cond, 
-        Flags, 
-        CondEx
-    );
-
-    flopr #(1) condreg(
-        clk, 
-        reset, 
-        CondEx, 
-        CondExDelayed
-    );
-
-    assign FlagWrite = FlagW & {2{CondEx}};
-    assign RegWrite = RegW & CondExDelayed;
-    assign MemWrite = MemW & CondExDelayed;
-    assign PCWrite = (PCS & CondExDelayed) | NextPC;
+    assign FlagWrite = FlagW & {2 {CondEx}};
+    assign RegWrite = RegW & PostCondEx;
+    assign MemWrite = MemW & PostCondEx;
+    assign PCWrite = NextPC | (PCS & PostCondEx);
 
 endmodule
