@@ -10,17 +10,13 @@ class Scanner:
         self.first = 0
         self.current = 0
         self.r_mnemotics = [Mnemonic.UNCOND, Mnemonic.EQ, Mnemonic.NE, Mnemonic.GT, Mnemonic.GE, Mnemonic.LT, Mnemonic.LE]
-        self.r_opers = [Token.ADD, Token.SUB, Token.FMUL, Token.AND, Token.ORR, Token.LSL, Token.LSR, Token.LDR, Token.STR, Token.B]
-        
+        self.r_opers = [OpToken.ADD, OpToken.SUB, OpToken.FMUL, OpToken.AND, OpToken.ORR, OpToken.LSL, OpToken.LSR, OpToken.LDR, OpToken.LDRB, OpToken.STR, OpToken.B, OpToken.EOR]
+        self.vec_opers = [VecToken.VADD, VecToken.VSUB, VecToken.VMUL, VecToken.VAND, VecToken.VORR, VecToken.VXOR]
+        self.f_opers = [FToken.FADD16, FToken.FMUL16, FToken.FADD32, FToken.FMUL32]
+
     def reset(self):
         self.current = 0
         self.first = 0
-
-    def checkReserved(self, lexema: str) -> Token:
-        if lexema in Token.__members__:
-            return Token[lexema]
-        else:
-            return Token.ERR
 
     def startLexema(self):
         self.first = self.current - 1
@@ -40,7 +36,7 @@ class Scanner:
         if self.current < len(self.input)-1:
             c = self.nextChar()
         else:
-            return TokenData(Token.END)
+            return TokenData(KeyToken.END)
 
         while c == ' ':
             c = self.nextChar()
@@ -53,17 +49,17 @@ class Scanner:
                 cn = self.nextChar()
                 if c == '0' and cn == 'x':
                     c = self.nextChar()
-                    while c.isdigit():
+                    while c.isdigit() or c.isalpha():
                         c = self.nextChar()
                     self.rollBack()
-                    token = TokenData(Token.HEXNUM, lexema=self.getLexema())
+                    token = TokenData(KeyToken.HEXNUM, lexema=self.getLexema())
                 else:
                     while cn.isdigit():
                         cn = self.nextChar()
                     self.rollBack()
-                    token = TokenData(Token.DNUM, lexema=self.getLexema())
+                    token = TokenData(KeyToken.DNUM, lexema=self.getLexema())
             else:
-                token = TokenData(Token.ERR, lexema=c)
+                token = TokenData(KeyToken.ERR, lexema=c)
         
         elif c == 'R' or c == 'r':
             c = self.nextChar()
@@ -72,32 +68,32 @@ class Scanner:
                     c2 = self.nextChar()
                     if c2.isdigit():
                         if c2 <= '5':
-                            token = TokenData(Token.REG, lexema=self.getLexema())
+                            token = TokenData(KeyToken.REG, lexema=self.getLexema())
                         else:
-                            token = TokenData(Token.LOGERR, lexema=self.getLexema())
+                            token = TokenData(KeyToken.LOGERR, lexema=self.getLexema())
                     else:
                         self.rollBack()
-                        token = TokenData(Token.REG, lexema=self.getLexema())
+                        token = TokenData(KeyToken.REG, lexema=self.getLexema())
                 else:
-                    token = TokenData(Token.REG, lexema=self.getLexema())
+                    token = TokenData(KeyToken.REG, lexema=self.getLexema())
             else:
-                token = TokenData(Token.ERR, lexema=c)
+                token = TokenData(KeyToken.ERR, lexema=c)
         
         elif c == '[':
-            token = TokenData(Token.LCOR)
+            token = TokenData(KeyToken.LCOR)
         elif c == ']':
-            token = TokenData(Token.RCOR)
+            token = TokenData(KeyToken.RCOR)
         elif c == ',':
-            token = TokenData(Token.COMMA)
+            token = TokenData(KeyToken.COMMA)
         elif c == '\n':
-            token = TokenData(Token.NEXT)
+            token = TokenData(KeyToken.NEXT)
         elif c == ';':
             c = self.nextChar()
             while c != '\n':
                 c = self.nextChar()
-            return TokenData(Token.COMMENT)
+            return TokenData(KeyToken.COMMENT)
         elif c == ':':
-            token = TokenData(Token.TPOINTS)
+            token = TokenData(KeyToken.TPOINTS)
         
         elif c.isalpha():
             c = self.nextChar()
@@ -106,16 +102,30 @@ class Scanner:
             self.rollBack()
            
             lex = self.getLexema()
-            tt = self.checkReserved(lex)
-            for i in range(10):
-                if int(tt) >= 7*i+1 and int(tt) <= 7*(i+1):
-                    return TokenData(self.r_opers[i], mnemonic=self.r_mnemotics[(int(tt) % 7)-1])
-            
-            if tt == Token.ADDS or tt == Token.SUBS or tt == Token.FMULS:
+            if lex in FlagToken.__members__:
+                tt = FlagToken[lex]
                 token = TokenData(tt, mnemonic=Mnemonic.UNCOND)
+            elif lex in FToken.__members__:
+                tt = FToken[lex]
+                for i in range(len(self.f_opers)):
+                    if int(tt) >= 7*i+1 and int(tt) <= 7*(i+1):
+                        token = TokenData(self.f_opers[i], mnemonic=self.r_mnemotics[(int(tt) % 7)-1])
+                        break
+            elif lex in VecToken.__members__:
+                tt = VecToken[lex]
+                for i in range(len(self.vec_opers)):
+                    if int(tt) >= 7*i+1 and int(tt) <= 7*(i+1):
+                        token = TokenData(self.vec_opers[i], mnemonic=self.r_mnemotics[(int(tt) % 7)-1])
+                        break
+            elif lex in OpToken.__members__:
+                tt = OpToken[lex]
+                for i in range(len(self.r_opers)):
+                    if int(tt) >= 7*i+1 and int(tt) <= 7*(i+1):
+                        token = TokenData(self.r_opers[i], mnemonic=self.r_mnemotics[(int(tt) % 7)-1])
+                        break
             else:
-                token = TokenData(Token.LABEL, lexema=self.getLexema())
+                token = TokenData(KeyToken.LABEL, lexema=self.getLexema())
         else:
-            token = TokenData(Token.ERR, lexema=c)
+            token = TokenData(KeyToken.ERR, lexema=c)
 
         return token

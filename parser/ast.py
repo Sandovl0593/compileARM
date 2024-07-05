@@ -20,7 +20,6 @@ commands = {
     "ORR"  :"1100",
     "AND"  :"0000",
     "EOR"  :"0001",
-    "XOR"  :"0001",
     # shift
     "LSL"  :"1101",
     "LSR"  :"1101",
@@ -54,7 +53,10 @@ class DpInst(Instr):
         self.inmediate = inmediate
     
     def getARMcode(self):
-        print(f"  {self.cmd}{self.cond if self.cond != 'UNCOND' else ''}{'S' if self.flags else ''} R{self.rd}, R{self.rn}, {'#' if self.inmediate else 'R'}{self.sr2}")
+        cmd_f = self.cmd
+        if not self.flags:
+            cmd_f = cmd_f + self.cond if self.cond != 'UNCOND' else ''
+        print(f"  {cmd_f} R{self.rd}, R{self.rn}, {'#' if self.inmediate else 'R'}{self.sr2}")
     
     def getMachineCode(self, os: TextIO):
         os.write(conditions[self.cond])           # cond
@@ -105,7 +107,7 @@ class MemoryInst(Instr):
         os.write("1")                                         # U
         os.write("1" if 'B' in self.cmd else "0")             # B
         os.write("0")                                         # W
-        os.write("1" if 'L' in self.cmd else "0")             # L
+        os.write("1" if self.cmd[0] == 'L' else "0")             # L
         os.write(format(self.rn, '04b'))                      # Rn
         os.write(format(self.rd, '04b'))                      # Rd
 
@@ -128,7 +130,7 @@ class DeclBranch(Instr):
         self.label = label
     
     def getARMcode(self):
-        print(f"  {self.label}:")
+        print(f"{self.label}:")
     
     def getMachineCode(self, os: TextIO):
         pass
@@ -149,7 +151,10 @@ class BranchInst(Instr):
         os.write(conditions[self.cond])               # cond
         os.write("10")                               # op
         os.write("10")                               # 1L (no linked in this case)
-        os.write(format(self.count_pos_instr, '024b') if self.count_pos_instr > 0 else "0"*24) # count_pos_instr between BTA and PC+8
+        if self.count_pos_instr < 0:
+            # two complement for negative values
+            self.count_pos_instr = (1 << 24) + self.count_pos_instr
+        os.write(format(self.count_pos_instr + 1, '024b')) # count_pos_instr between BTA and PC+8
         os.write("\n")
     
     def __del__(self):
