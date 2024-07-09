@@ -22,8 +22,8 @@ class Parser:
             return False
         return self.current.type == ttype
 
-    def matchDpInstr(self, ttype) -> bool:
-        if self.checkDpInstr(ttype):
+    def matchDpInstr(self) -> bool:
+        if self.checkDpInstr():
             self.advance()
             return True
         return False
@@ -33,8 +33,8 @@ class Parser:
             return False
         return self.current.type in [OpToken.ADD, OpToken.SUB, OpToken.FMUL, OpToken.AND, OpToken.ORR, OpToken.LSL, OpToken.LSR, OpToken.EOR]
 
-    def matchMemoryInstr(self, ttype) -> bool:
-        if self.checkMemoryInstr(ttype):
+    def matchMemoryInstr(self) -> bool:
+        if self.checkMemoryInstr():
             self.advance()
             return True
         return False
@@ -44,8 +44,8 @@ class Parser:
             return False
         return self.current.type in [OpToken.LDR, OpToken.STR, OpToken.LDRB]
     
-    def matchFlagInstr(self, ttype) -> bool:
-        if self.checkFlagInstr(ttype):
+    def matchFlagInstr(self) -> bool:
+        if self.checkFlagInstr():
             self.advance()
             return True
         return False
@@ -215,5 +215,5 @@ class Parser:
             self.parserError("Se esperaba ':'")
         self.linePos -= 1
         if read:
-            print(label, ": ", end="\n")
+            print(f"{label}: ", end="\n")
         return label
