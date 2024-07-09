@@ -9,7 +9,6 @@ module controller (
     ALUSrc,
     ALUControl,
     MemWrite,
-    OnlyByte,
     MemtoReg,
     PCSrc
 );
@@ -24,7 +23,6 @@ module controller (
     output wire ALUSrc;
     output wire [2:0] ALUControl;
     output wire MemWrite;
-    output wire OnlyByte;
     output wire MemtoReg;
     output wire PCSrc;
 
