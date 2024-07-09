@@ -2,43 +2,57 @@ module testbench;
     reg clk;
     reg reset;
     wire [31:0] WriteData;
-    wire [31:0] Adr;
+    wire [31:0] DataAdr;
     wire MemWrite;
-
+    wire [31:0] Instr;
+    wire [31:0] ReadData;
+    wire [31:0] PC;
     top dut(
         .clk(clk),
         .reset(reset),
         .WriteData(WriteData),
-        .Adr(Adr),
-        .MemWrite(MemWrite)
+        .DataAdr(DataAdr),
+        .MemWrite(MemWrite),
+        .PC(PC),
+        .Instr(Instr),
+        .ReadData(ReadData),
+        .ALUFlags(ALUFlags)
     );
+
     initial begin
         reset <= 1;
-        #(22)
-            ;
+        #(10);
         reset <= 0;
+        #150;
+        $finish;
     end
+    
     always begin
         clk <= 1;
-        #(5)
-            ;
+        #(5);
         clk <= 0;
-        #(5)
-            ;
+        #(5);
     end
-    always @(negedge clk)
+
+/*
+    always @(negedge clk) begin
         if (MemWrite)
-            if ((Adr === 100) & (WriteData === 7)) begin
+            if ((DataAdr === 128) & (WriteData === 254)) 
+            begin
                 $display("Simulation succeeded");
+                #30;
                 $stop;
             end
-            else if (Adr !== 96) begin
+            else if ((DataAdr === 128) & (WriteData !== 255)) 
+            begin
                 $display("Simulation failed");
+                #30;
                 $stop;
             end
-            
-    // initial begin
-    //    $dumpfile("output.vcd");
-    //    $dumpvars;
-    // end
+    end */
+
+    /*initial begin
+        $dumpfile("lab5.vcd");
+        $dumpvars;
+    end */
 endmodule

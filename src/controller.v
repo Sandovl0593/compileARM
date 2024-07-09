@@ -3,56 +3,45 @@ module controller (
     reset,
     Instr,
     ALUFlags,
-    PCWrite,
-    MemWrite,
-    RegWrite,
-    IRWrite,
-    AdrSrc,
     RegSrc,
-    ALUSrcA,
-    ALUSrcB,
-    ResultSrc,
+    RegWrite,
     ImmSrc,
-    ALUControl
+    ALUSrc,
+    ALUControl,
+    MemWrite,
+    OnlyByte,
+    MemtoReg,
+    PCSrc
 );
     input wire clk;
     input wire reset;
     input wire [31:12] Instr;
     input wire [3:0] ALUFlags;
 
-    output wire PCWrite;
-    output wire MemWrite;
-    output wire RegWrite;
-    output wire IRWrite;
-    output wire AdrSrc;
     output wire [1:0] RegSrc;
-    output wire [1:0] ALUSrcA;
-    output wire [1:0] ALUSrcB;
-    output wire [1:0] ResultSrc;
+    output wire RegWrite;
     output wire [1:0] ImmSrc;
+    output wire ALUSrc;
     output wire [2:0] ALUControl;
+    output wire MemWrite;
+    output wire OnlyByte;
+    output wire MemtoReg;
+    output wire PCSrc;
 
     wire [1:0] FlagW;
     wire PCS;
-    wire NextPC;
     wire RegW;
     wire MemW;
     decode dec(
-        .clk(clk),
-        .reset(reset),
         .Op(Instr[27:26]),
         .Funct(Instr[25:20]),
         .Rd(Instr[15:12]),
         .FlagW(FlagW),
         .PCS(PCS),
-        .NextPC(NextPC),
         .RegW(RegW),
         .MemW(MemW),
-        .IRWrite(IRWrite),
-        .AdrSrc(AdrSrc),
-        .ResultSrc(ResultSrc),
-        .ALUSrcA(ALUSrcA),
-        .ALUSrcB(ALUSrcB),
+        .MemtoReg(MemtoReg),
+        .ALUSrc(ALUSrc),
         .ImmSrc(ImmSrc),
         .RegSrc(RegSrc),
         .ALUControl(ALUControl)
@@ -64,10 +53,9 @@ module controller (
         .ALUFlags(ALUFlags),
         .FlagW(FlagW),
         .PCS(PCS),
-        .NextPC(NextPC),
         .RegW(RegW),
         .MemW(MemW),
-        .PCWrite(PCWrite),
+        .PCSrc(PCSrc),
         .RegWrite(RegWrite),
         .MemWrite(MemWrite)
     );

@@ -2,31 +2,43 @@ module top (
     clk,
     reset,
     WriteData,
-    Adr,
-    MemWrite
+    DataAdr,
+    MemWrite,
+    PC,
+    Instr,
+    ReadData,
+    ALUFlags
 );
     input wire clk;
     input wire reset;
     output wire [31:0] WriteData;
-    output wire [31:0] Adr;
+    output wire [31:0] DataAdr;
     output wire MemWrite;
-    wire [31:0] PC;
-    wire [31:0] Instr;
-    wire [31:0] ReadData;
+    output wire [31:0] PC;
+    output wire [31:0] Instr;
+    output wire [31:0] ReadData;
+    output wire [3:0] ALUFlags;
+    wire [31:0] LastUpdate;
 
-    // instantiate processor and shared memory
     arm arm(
         .clk(clk),
         .reset(reset),
+        .PC(PC),
+        .Instr(Instr),
         .MemWrite(MemWrite),
-        .Adr(Adr),
+        .ALUResult(DataAdr),
         .WriteData(WriteData),
-        .ReadData(ReadData)
+        .ReadData(LastUpdate),
+        .ALUFlags(ALUFLags)
     );
-    mem mem(
+    imem imem(
+        .a(PC),
+        .rd(Instr)
+    );
+    dmem dmem(
         .clk(clk),
         .we(MemWrite),
-        .a(Adr),
+        .a(DataAdr),
         .wd(WriteData),
         .rd(ReadData)
     );
