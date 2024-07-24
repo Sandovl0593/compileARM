@@ -1,6 +1,6 @@
 <h1 align="center">CompileARM</h1>
 
-<h4 align="center"><em>SingleCycle proccessor With Floating Point Unit and Vector Unit support</em></h4>
+<h4 align="center"><em>[Title soon]</em></h4>
 
 ## Contenido
 
@@ -8,10 +8,8 @@
 #### Design execution by structural implem. Verilog using instructions machine code in the `imem.v`.
 
 ## Cracks del proyecto
-- Hósmer Casma M.
-- Jazmin Soto Q.
-- Adrian Sandoval H.
-- Josep Castro E.
+- Adrian Sandoval Huamaní
+- [Soon]
 
 ## Simulación in Ikarus
 
