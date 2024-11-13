@@ -8,7 +8,8 @@ module alu (
     wire  neg, zero, carry, overflow;
     wire [31:0] condinvb;
     wire [32:0] sum;
-    assign condinvb = ALUControl[0] ? ~b : b;
+
+    assign condinvb = ALUControl[0] ? ~b : b; // determina si se invierte b
     assign sum = a + condinvb + ALUControl[0];
     always @(*)
     begin
@@ -19,6 +20,7 @@ module alu (
         3'b100: Result = a ^ b;
         endcase
     end
+
     assign neg      = Result[31];
     assign zero     = (Result == 32'b0);
     assign carry    = (ALUControl[1] == 1'b0) & sum[32];

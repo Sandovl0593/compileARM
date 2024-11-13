@@ -30,11 +30,14 @@ module controller (
     wire PCS;
     wire RegW;
     wire MemW;
+
     decode dec(
+        // inputs
         .Op(Instr[27:26]),
         .Funct(Instr[25:20]),
         .Rd(Instr[15:12]),
-        .FlagW(FlagW),
+        // outputs
+        .FlagW(FlagW),            // reg
         .PCS(PCS),
         .RegW(RegW),
         .MemW(MemW),
@@ -42,9 +45,10 @@ module controller (
         .ALUSrc(ALUSrc),
         .ImmSrc(ImmSrc),
         .RegSrc(RegSrc),
-        .ALUControl(ALUControl)
+        .ALUControl(ALUControl)   // reg
     );
     condlogic cl(
+        // inputs
         .clk(clk),
         .reset(reset),
         .Cond(Instr[31:28]),
@@ -53,6 +57,7 @@ module controller (
         .PCS(PCS),
         .RegW(RegW),
         .MemW(MemW),
+        // outputs
         .PCSrc(PCSrc),
         .RegWrite(RegWrite),
         .MemWrite(MemWrite)

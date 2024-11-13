@@ -24,11 +24,15 @@ module datapath (
     input wire [2:0] ALUControl;
     input wire MemtoReg;
     input wire PCSrc;
+
     output wire [3:0] ALUFlags;
     output wire [31:0] PC;
+
     input wire [31:0] Instr;
+
     output wire [31:0] ALUResult;
     output wire [31:0] WriteData;
+
     input wire [31:0] ReadData;
 
     wire [31:0] PCNext;
@@ -76,6 +80,7 @@ module datapath (
         .y(RA2)
     );
     regfile rf(
+        // inputs
         .clk(clk),
         .we3(RegWrite),
         .ra1(RA1),
@@ -83,6 +88,7 @@ module datapath (
         .wa3(Instr[15:12]),
         .wd3(Result),
         .r15(PCPlus8),
+        // outputs
         .rd1(SrcA),
         .rd2(WriteData)
     );

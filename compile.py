@@ -1,6 +1,6 @@
 import sys
-from tomachine import *
-from scanner import *
+from parser.tomachine import *
+from parser.scanner import *
 
 if (__name__ == '__main__'):
     if (len(sys.argv) != 2):

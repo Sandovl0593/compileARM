@@ -2,15 +2,16 @@ module top (
     clk,
     reset,
     WriteData,
-    DataAdr,
+    DataAdr, // ALUResult from datapath
     MemWrite,
     PC,
     Instr,
     ReadData,
-    ALUFlags
+    ALUFlags,
 );
     input wire clk;
     input wire reset;
+
     output wire [31:0] WriteData;
     output wire [31:0] DataAdr;
     output wire MemWrite;
@@ -18,17 +19,18 @@ module top (
     output wire [31:0] Instr;
     output wire [31:0] ReadData;
     output wire [3:0] ALUFlags;
-    wire [31:0] LastUpdate;
 
     arm arm(
+        // inputs
         .clk(clk),
         .reset(reset),
-        .PC(PC),
         .Instr(Instr),
+        .ReadData(ReadData),
+        // outputs
+        .PC(PC),
         .MemWrite(MemWrite),
-        .ALUResult(DataAdr),
         .WriteData(WriteData),
-        .ReadData(LastUpdate),
+        .ALUResult(DataAdr),
         .ALUFlags(ALUFLags)
     );
     imem imem(
@@ -36,10 +38,12 @@ module top (
         .rd(Instr)
     );
     dmem dmem(
+        // inputs
         .clk(clk),
         .we(MemWrite),
         .a(DataAdr),
         .wd(WriteData),
+        // outputs
         .rd(ReadData)
     );
 endmodule

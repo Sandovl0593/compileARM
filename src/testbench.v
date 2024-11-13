@@ -1,22 +1,27 @@
 module testbench;
     reg clk;
     reg reset;
+
     wire [31:0] WriteData;
-    wire [31:0] DataAdr;
+    wire [31:0] DataAdr;    // ALUResult from datapath
     wire MemWrite;
     wire [31:0] Instr;
     wire [31:0] ReadData;
     wire [31:0] PC;
+    wire [3:0] ALUFlags;
+
     top dut(
         .clk(clk),
         .reset(reset),
+
+        // outputs
         .WriteData(WriteData),
         .DataAdr(DataAdr),
         .MemWrite(MemWrite),
         .PC(PC),
         .Instr(Instr),
         .ReadData(ReadData),
-        .ALUFlags(ALUFlags)
+        .ALUFlags(ALUFlags),
     );
 
     initial begin
@@ -34,7 +39,7 @@ module testbench;
         #(5);
     end
 
-/*
+
     always @(negedge clk) begin
         if (MemWrite)
             if ((DataAdr === 128) & (WriteData === 254)) 
@@ -49,10 +54,10 @@ module testbench;
                 #30;
                 $stop;
             end
-    end */
+    end
 
-    /*initial begin
-        $dumpfile("lab5.vcd");
+    /* initial begin
+        $dumpfile("result.vcd");
         $dumpvars;
     end */
 endmodule
