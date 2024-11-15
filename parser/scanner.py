@@ -1,7 +1,7 @@
-from encoding import *
+from parser.encoding import *
 
 dp_binary_op = [
-    "ADD", "SUB", "AND", "ORR", "EOR"
+    "ADD", "SUB", "AND", "ORR", "EOR", "UDIV", "SDIV"
 ]
 dp_only_flags = [
     "CMP", "CMN", "TST", "TEQ"
@@ -14,10 +14,14 @@ def token_data_processing(list_of_tokens):
     for oper in dp_binary_op:
         if oper in command: command = oper; break
 
-    if "MOV" in command: command = "MOV"
-
     for oper in dp_only_flags:
         if oper in command: command = oper; break
+
+    if "MOV" in command: command = "MOV"
+    if "MLA" in command: command = "MLA"
+
+    # for oper in dp_terna_op:
+    #     if oper in command: command = oper; break
 
     # ----------- base inst
     post_cmd = get_oper[len(command):]
@@ -82,6 +86,15 @@ def token_data_processing(list_of_tokens):
             inst["shamt"] = 'R0'
             inst["I_sh"] = True
 
+    elif command == "MLA":
+        # -- [OP][S][cond] Rn, Rd, Rm, Operand2
+        inst["Rd"] = list_of_tokens[1]
+        inst["Rn"] = list_of_tokens[2]
+        src2 = inst["src2"] = list_of_tokens[3]
+        inst["I"] = '0'
+        inst["cmd_sh"] = 'LSL'
+        shamt = inst["shamt"] = list_of_tokens[4]
+        inst["I_sh"] = False
 
     return inst
 

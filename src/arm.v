@@ -6,8 +6,7 @@ module arm (
     MemWrite,
     ALUResult,
     WriteData,
-    ReadData,
-    ALUFlags,
+    ReadData
 );
     input wire clk;
     input wire reset;
@@ -20,7 +19,7 @@ module arm (
 
     input wire [31:0] ReadData;
 
-    output wire [3:0] ALUFlags;
+    wire [3:0] ALUFlags;
     wire RegWrite;
     wire ALUSrc;
     wire MemtoReg;

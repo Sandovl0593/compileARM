@@ -6,8 +6,7 @@ module top (
     MemWrite,
     PC,
     Instr,
-    ReadData,
-    ALUFlags,
+    ReadData
 );
     input wire clk;
     input wire reset;
@@ -18,7 +17,6 @@ module top (
     output wire [31:0] PC;
     output wire [31:0] Instr;
     output wire [31:0] ReadData;
-    output wire [3:0] ALUFlags;
 
     arm arm(
         // inputs
@@ -30,8 +28,7 @@ module top (
         .PC(PC),
         .MemWrite(MemWrite),
         .WriteData(WriteData),
-        .ALUResult(DataAdr),
-        .ALUFlags(ALUFLags)
+        .ALUResult(DataAdr)
     );
     imem imem(
         .a(PC),

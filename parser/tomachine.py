@@ -1,4 +1,4 @@
-from encoding import *
+from parser.encoding import *
 
 MAX = 2**32
 
@@ -19,11 +19,19 @@ def toMachine_dp(base_ins, I, cmd, S, Rn, Rd, src2, cmd_sh, shamt, I_sh):
         number = src2[1:]
         value_imm = int(number, 16) if number[:2] == '0x' else int(number)
         value_rot = 0
-        while value_imm > 255:
-            value_imm >>= 1
-            value_rot += 1
+        if value_imm > 255:
+            while value_imm % 2 == 0:
+                value_imm >>= 1
+                value_rot += 1
+            if value_rot % 2 == 1:
+                value_rot -= 1
+                value_imm <<= 1
+            rot_code = bn((32 - value_rot)/2, 4)
+        else:
+            rot_code = '0000'
         code_imm = bn(value_imm, 8)
-        result_code += bn(value_rot, 4) + code_imm
+        print(value_rot, value_imm, "->", code_imm, rot_code)
+        result_code += rot_code + code_imm
     else:
         code_Rm = bn(src2[1:], 4)
         if I_sh:

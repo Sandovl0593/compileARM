@@ -44,27 +44,25 @@ if (__name__ == '__main__'):
             else:
                 of_line.append(w.split()[0])
 
+        print(of_line, ' ---:')
         # verificar si la instruccion es de tipo dp
         if len(of_line) >= 3:
             if '[' not in of_line[2]:
                 inst = token_data_processing(of_line)
                 out.write(toMachine_dp(**inst) + '\n')
             else:
-                print(of_line, ' ---:')
                 # remove all the brackets
                 inst = token_memory(of_line)
                 out.write(toMachine_memory(**inst) + '\n')
-                print(inst, end='\n\n')
+            print(inst, end='\n\n')
 
         elif ':' not in of_line[0]:
             inst = token_branch(of_line, labels, real_pos[i])
             out.write(toMachine_branch(**inst) + '\n')
         
-            # print(inst, end='\n\n')
-    print(labels)
-    print(real_pos)
+            print(inst, end='\n\n')
     
-    print("\nBinary code generated in memfile_bin.dat")
+    print("\nBinary code generated")
     out.close()
     t.close()
 
@@ -81,4 +79,4 @@ if (__name__ == '__main__'):
 
     f.close()
     final.close()
-    print("\nHexadecimal code in memfile.dat")
+    print("\nHexadecimal code generated")
