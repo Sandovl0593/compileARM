@@ -1,6 +1,6 @@
 `timescale 1ns / 1ps
 
-module pipeline_tb;
+module testbench;
     reg clk;
     reg reset;
 
