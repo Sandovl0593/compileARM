@@ -112,14 +112,14 @@ module datapath (
     );
 
     mux2 #(4) ra1mux(
-        .d0(InstrF[19:16]),
+        .d0(InstrD[19:16]),
         .d1(4'b1111),
         .s(RegSrcD[0]),
         .y(RA1D)
     );
     mux2 #(4) ra2mux(
-        .d0(InstrF[3:0]),
-        .d1(InstrF[15:12]),
+        .d0(InstrD[3:0]),
+        .d1(InstrD[15:12]),
         .s(RegSrcD[1]),
         .y(RA2D)
     );
@@ -152,7 +152,7 @@ module datapath (
     );
     flop #(3) wa3Ereg(
         .clk(clk), .reset(reset), .clear(FlushE),
-        .d(InstrF[15:12]), .q(WA3E)
+        .d(InstrD[15:12]), .q(WA3E)
     );
     extend ext(
         .InstrF(InstrF[23:0]),
