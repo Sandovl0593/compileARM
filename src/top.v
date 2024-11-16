@@ -1,46 +1,55 @@
 module top (
     clk,
     reset,
-    WriteData,
-    DataAdr, // ALUResult from datapath
-    MemWrite,
-    PC,
-    Instr,
-    ReadData
+    WriteDataM,
+    DataAdrM, // ALUOutM from datapath
+    MemWriteM,
+    PCF,
+    InstrF,
+    ReadDataM,
+    // testbench pipeline outputs
+    InstrD, InstrE, InstrM, InstrW
 );
     input wire clk;
     input wire reset;
 
-    output wire [31:0] WriteData;
-    output wire [31:0] DataAdr;
-    output wire MemWrite;
-    output wire [31:0] PC;
-    output wire [31:0] Instr;
-    output wire [31:0] ReadData;
+    output wire [31:0] WriteDataM;
+    output wire [31:0] DataAdrM;
+    output wire MemWriteM;
+    output wire [31:0] PCF;
+    output wire [31:0] InstrF;
+    output wire [31:0] ReadDataM;
+
+    output wire [31:0] InstrD, InstrE, InstrM, InstrW;
 
     arm arm(
         // inputs
         .clk(clk),
         .reset(reset),
-        .Instr(Instr),
-        .ReadData(ReadData),
+        .InstrF(InstrF),
+        .ReadDataM(ReadDataM),
         // outputs
-        .PC(PC),
-        .MemWrite(MemWrite),
-        .WriteData(WriteData),
-        .ALUResult(DataAdr)
+        .PCF(PCF),
+        .MemWriteM(MemWriteM),
+        .WriteDataM(WriteDataM),
+        .ALUOutM(DataAdrM),
+        // testbench pipeline outputs
+        .InstrD(InstrD),
+        .InstrE(InstrE),
+        .InstrM(InstrM),
+        .InstrW(InstrW)
     );
     imem imem(
-        .a(PC),
-        .rd(Instr)
+        .a(PCF),
+        .rd(InstrF)
     );
     dmem dmem(
         // inputs
         .clk(clk),
-        .we(MemWrite),
-        .a(DataAdr),
-        .wd(WriteData),
+        .we(MemWriteM),
+        .a(DataAdrM),
+        .wd(WriteDataM),
         // outputs
-        .rd(ReadData)
+        .rd(ReadDataM)
     );
 endmodule

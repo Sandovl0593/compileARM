@@ -1,53 +1,65 @@
 module condlogic (
-    clk,
-    reset,
-    Cond,
+    PCSrcE,
+    RegWriteE,
+    MemtoRegE,
+    MemWriteE,
+    BranchE,
+    FlagWriteE,
+    CondE,
+    FlagsE,
     ALUFlags,
-    FlagW,
-    PCS,
-    RegW,
-    MemW,
-    PCSrc,
-    RegWrite,
-    MemWrite
+    // outputs
+    BranchTakenE,
+    FlagsNextE,
+    PCSrcEOut,
+    RegWriteEOut,
+    MemWriteEOut
 );
-    input wire clk;
-    input wire reset;
-    input wire [3:0] Cond;
-    input wire [3:0] ALUFlags;
-    input wire [1:0] FlagW;
-    input wire PCS;
-    input wire RegW;
-    input wire MemW;
+    input wire PCSrcE;
+    input wire RegWriteE;
+    input wire MemtoRegE;
+    input wire MemWriteE;
+    input wire BranchE;
+    input wire [1:0] FlagWriteE;
+    input wire [3:0] CondE;
+    input [3:0] FlagsE;
 
-    output wire PCSrc;
-    output wire RegWrite;
-    output wire MemWrite;
+    output wire PCSrcE;
+    output wire RegWriteE;
+    output wire MemWriteE;
+    output reg [3:0] FlagsNextE;
 
     wire [1:0] FlagWrite;
-    wire [3:0] Flags;
-    wire CondEx;
-    flopenr #(2) flagreg1(
-        .clk(clk),
-        .reset(reset),
-        .en(FlagWrite[1]),
-        .d(ALUFlags[3:2]),
-        .q(Flags[3:2])
-    );
-    flopenr #(2) flagreg0(
-        .clk(clk),
-        .reset(reset),
-        .en(FlagWrite[0]),
-        .d(ALUFlags[1:0]),
-        .q(Flags[1:0])
-    );
-    condcheck cc(
-        .Cond(Cond),
-        .Flags(Flags),
-        .CondEx(CondEx)
-    );
-    assign FlagWrite = FlagW & {2 {CondEx}};
-    assign RegWrite = RegW & CondEx;
-    assign MemWrite = MemW & CondEx;
-    assign PCSrc = PCS & CondEx;
+    wire CondExE;
+
+    wire neg, zero, carry, overflow, ge; 
+    assign {neg, zero, carry, overflow} = FlagsE;
+    assign ge = (neg == overflow); 
+    always @(*)
+        case (CondE)
+            4'b0000: CondExE = zero;
+            4'b0001: CondExE = ~zero;
+            4'b0010: CondExE = carry;
+            4'b0011: CondExE = ~carry;
+            4'b0100: CondExE = neg;
+            4'b0101: CondExE = ~neg;
+            4'b0110: CondExE = overflow;
+            4'b0111: CondExE = ~overflow;
+            4'b1000: CondExE = carry & ~zero;
+            4'b1001: CondExE = ~(carry & ~zero);
+            4'b1010: CondExE = ge;
+            4'b1011: CondExE = ~ge;
+            4'b1100: CondExE = ~zero & ge;
+            4'b1101: CondExE = ~(~zero & ge);
+            4'b1110: CondExE = 1'b1;
+            default: CondExE = 1'bx;
+        endcase
+
+    assign FlagsNextE[3:2] = (FlagsWriteE[1] & CondExE) ? ALUFlags[3:2] : FlagsE[3:2];
+    assign FlagsNextE[1:0] = (FlagsWriteE[0] & CondExE) ? ALUFlags[1:0] : FlagsE[1:0];
+    assign BranchTakenE = BranchE & CondExE;
+
+    assign RegWriteEOut = RegWriteE & CondExE;
+    assign MemWriteEOut = MemWriteE & CondExE;
+    assign PCSrcEOut = PCSrcE & CondExE;
 endmodule

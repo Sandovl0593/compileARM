@@ -13,9 +13,12 @@ module regfile (
     output wire [31:0] rd2;
     reg [31:0] rf [14:0];
     
-    always @(posedge clk)
-        if (we3)
+    // OJO: en la primera parte se lee el valor en la memoria, 
+    // y en la segunda parte se escribe en la memoria
+    always @(negedge clk)
+        if (we3 & (wa3 != 4'b1111))
             rf[wa3] <= wd3;
+
     assign rd1 = (ra1 == 4'b1111 ? r15 : rf[ra1]);
     assign rd2 = (ra2 == 4'b1111 ? r15 : rf[ra2]);
 endmodule

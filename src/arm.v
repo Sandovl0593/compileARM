@@ -1,66 +1,104 @@
 module arm (
-    clk,
-    reset,
-    PC,
-    Instr,
-    MemWrite,
-    ALUResult,
-    WriteData,
-    ReadData
+    clk, reset,
+    InstrF,
+    ALUOutM,
+    PCF,
+    WriteDataM,
+    ReadDataM,
+    InstrD, InstrE, InstrM, InstrW
 );
     input wire clk;
     input wire reset;
-    input wire [31:0] Instr;
+    input wire [31:0] InstrF; // <- from imem
+    output wire [31:0] PCF; // -> to imem
+    output wire [31:0] ALUOutM; // -> to dmem
+    output wire [31:0] WriteDataM; // -> to dmem
+    input wire [31:0] ReadDataM; // <- from dmem
 
-    output wire [31:0] PC;
-    output wire MemWrite;
-    output wire [31:0] ALUResult;
-    output wire [31:0] WriteData;
+    wire [1:0] Op;
+    wire [5:0] Funct;
+    wire [3:0] Rd;
+    wire [3:0] CondD;
 
-    input wire [31:0] ReadData;
+    reg StallF,  StallD;
+    wire PCSrcD;
+    wire RegSrcD;
+    wire ImmSrcD;
 
-    wire [3:0] ALUFlags;
-    wire RegWrite;
-    wire ALUSrc;
-    wire MemtoReg;
-    wire PCSrc;
-    wire [1:0] RegSrc;
-    wire [1:0] ImmSrc;
-    wire [2:0] ALUControl;
+    reg FlushD, FlushE;
+    wire ALUSrcE;
+    wire BranchTakenE;
+    wire [2:0] ALUControlE;
+    wire ALUSrcE;
+    wire BranchTakenE;
+    reg ForwardAE, ForwardBE;
 
-    controller c(
-        // inputs
+    wire MemWriteM;   // for now
+    wire ReadDataM;
+
+    wire PCSrcW;
+    wire RegWriteW;
+    wire MemtoRegW;
+
+    output wire [31:0] InstrD, InstrE, InstrM, InstrW;   // for testbench pipeline
+
+    controller cll(
         .clk(clk),
         .reset(reset),
-        .Instr(Instr[31:12]),
-        .ALUFlags(ALUFlags),
-        // outputs
-        .RegSrc(RegSrc),
-        .RegWrite(RegWrite),
-        .ImmSrc(ImmSrc),
-        .ALUSrc(ALUSrc),
-        .ALUControl(ALUControl),
-        .MemWrite(MemWrite),
-        .MemtoReg(MemtoReg),
-        .PCSrc(PCSrc)
+        .Op(Op),
+        .Funct(Funct),
+        .Rd(Rd),
+        .CondD(CondD),
+        .FlushE(FlushE),
+        .RegSrcD(RegSrcD),
+        .ImmSrcD(ImmSrcD),
+        .BranchTakenE(BranchTakenE),
+        .ALUControlE(ALUControlE),
+        .ALUSrcE(ALUSrcE),
+        .MemWriteM(MemWriteM),
+        .PCSrcW(PCSrcW),
+        .RegWriteW(RegWriteW),
+        .MemtoRegW(MemtoRegW)
     );
+
+    // hazard incomplete -> default values:
+    always @(*) begin
+        StallF = 0;
+        StallD = 0;
+        FlushD = 0;
+        FlushE = 0;
+        ForwardAE = 2'b00;
+        ForwardBE = 2'b00;
+    end
+
     datapath dp(
-        // inputs
         .clk(clk),
         .reset(reset),
-        .RegSrc(RegSrc),
-        .RegWrite(RegWrite),
-        .ImmSrc(ImmSrc),
-        .ALUSrc(ALUSrc),
-        .ALUControl(ALUControl),
-        .MemtoReg(MemtoReg),
-        .PCSrc(PCSrc),
-        .Instr(Instr),
-        .ReadData(ReadData)
-        // outputs
+        .RegSrcD(RegSrcD),
+        .ImmSrcD(ImmSrcD),
+        .ALUSrcE(ALUSrcE),
+        .ALUControlE(ALUControlE),
+        .BranchTakenE(BranchTakenE),
+        .ReadDataM(ReadDataM),
+        .PCSrcW(PCSrcW),
+        .MemtoRegW(MemtoRegW),
+        .RegWriteW(RegWriteW),
+        .StallF(StallF),
+        .StallD(StallD),
+        .FlushD(FlushD),
+        .FlushE(FlushE),
+        .ForwardAE(ForwardAE),
+        .ForwardBE(ForwardBE),
         .ALUFlags(ALUFlags),
-        .PC(PC),
-        .ALUResult(ALUResult),
-        .WriteData(WriteData),
+        .PCF(PCF),
+        .InstrF(InstrF),
+        .ALUOutM(ALUOutM),
+        .WriteDataM(WriteDataM),
+        // testbench pipeline outputs
+        .InstrD(InstrD),
+        .InstrE(InstrE),
+        .InstrM(InstrM),
+        .InstrW(InstrW)
     );
+
 endmodule

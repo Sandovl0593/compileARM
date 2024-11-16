@@ -1,27 +1,32 @@
-module testbench;
+`timescale 1ns / 1ps
+
+module pipeline_tb;
     reg clk;
     reg reset;
 
-    wire [31:0] WriteData;
-    wire [31:0] DataAdr;    // ALUResult from datapath
-    wire MemWrite;
-    wire [31:0] Instr;
-    wire [31:0] ReadData;
-    wire [31:0] PC;
+    wire [31:0] WriteDataM;
+    wire [31:0] DataAdrM;
+    wire MemWriteM;
+    wire [31:0] InstrF;
+    wire [31:0] ReadDataM;
+    wire [31:0] PCF;
     wire [3:0] ALUFlags;
+
+    wire [31:0] InstrD, InstrE, InstrM, InstrW;
 
     top dut(
         .clk(clk),
         .reset(reset),
-
-        // outputs
-        .WriteData(WriteData),
-        .DataAdr(DataAdr),
-        .MemWrite(MemWrite),
-        .PC(PC),
-        .Instr(Instr),
-        .ReadData(ReadData),
-        .ALUFlags(ALUFlags),
+        .WriteDataM(WriteDataM),
+        .DataAdrM(DataAdrM),
+        .MemWriteM(MemWriteM),
+        .PCF(PCF),
+        .InstrF(InstrF),
+        .ReadDataM(ReadDataM),
+        .InstrD(InstrD),
+        .InstrE(InstrE),
+        .InstrM(InstrM),
+        .InstrW(InstrW)
     );
 
     initial begin
@@ -57,7 +62,7 @@ module testbench;
     end
 
     /* initial begin
-        $dumpfile("result.vcd");
+        $dumpfile("pipeline.vcd");
         $dumpvars;
     end */
 endmodule
