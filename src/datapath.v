@@ -150,6 +150,10 @@ module datapath (
         .clk(clk), .reset(reset), .clear(FlushE),
         .d(RD2D), .q(RD2E)
     );
+    flop #(3) wa3Ereg(
+        .clk(clk), .reset(reset), .clear(FlushE),
+        .d(InstrF[15:12]), .q(WA3E)
+    );
     extend ext(
         .InstrF(InstrF[23:0]),
         .ImmSrcD(ImmSrcD),
