@@ -138,7 +138,7 @@ module datapath (
     );
 
     // ------- EXECUTE ------------
-    floprc #(32) instDreg(
+    floprc #(32) instEreg(
         .clk(clk), .reset(reset), .clear(FlushE),
         .d(InstrD), .q(InstrE)                // -> output InstrE to view
     );
@@ -155,9 +155,9 @@ module datapath (
         .d(InstrD[15:12]), .q(WA3E)
     );
     extend ext(
-        .InstrF(InstrF[23:0]),
-        .ImmSrcD(ImmSrcD),
-        .ExtImmD(ExtImmD)
+        .Instr(InstrD[23:0]),
+        .ImmSrc(ImmSrcD),
+        .ExtImm(ExtImmD)
     );
     floprc #(32) extimmEreg(
         .clk(clk), .reset(reset), .clear(FlushE),
