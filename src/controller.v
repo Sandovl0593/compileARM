@@ -3,6 +3,7 @@ module controller (
     Op, Funct, Rd,
     CondD,
     FlushE,
+    ALUFlags,
     // outputs
     RegSrcD,
     ImmSrcD,
@@ -20,6 +21,7 @@ module controller (
     input wire [5:0] Funct;
     input wire [3:0] Rd;
     input wire [3:0] CondD;
+    input wire [3:0] ALUFlags;
 
     wire PCSrcD;
     wire RegWriteD; 
@@ -28,12 +30,12 @@ module controller (
     wire [2:0] ALUControlD;
     wire BranchD;  
     wire ALUSrcD;
-    wire [1:0] FlagWwiteD;
+    wire [1:0] FlagWriteD;
     output wire [1:0] ImmSrcD;
     output wire [1:0] RegSrcD;
 
     input wire FlushE;
-    reg [3:0] FlagsNextE;
+    wire [3:0] FlagsNextE;
 
     wire PCSrcE;
     wire RegWriteE;
@@ -44,7 +46,7 @@ module controller (
     output wire ALUSrcE;
     wire [1:0] FlagWriteE;
     wire [3:0] CondE;
-    reg [3:0] FlagsE;
+    wire [3:0] FlagsE;
 
     wire PCSrcE_afAnd;
     wire RegWriteE_afAnd;
@@ -77,34 +79,34 @@ module controller (
     );
     
     // ------- EXECUTE ------------
-    floprc pcsrcEreg(.clk(clk), .reset(reset), .clear(FlushE),
+    floprc #(1) pcsrcEreg(.clk(clk), .reset(reset), .clear(FlushE),
         .d(PCSrcD),.q(PCSrcE)
     );
-    floprc regwriteEreg(.clk(clk), .reset(reset), .clear(FlushE),
+    floprc #(1) regwriteEreg(.clk(clk), .reset(reset), .clear(FlushE),
         .d(RegWriteD),.q(RegWriteE)
     );
-    floprc memtoregEreg(.clk(clk), .reset(reset), .clear(FlushE),
+    floprc #(1) memtoregEreg(.clk(clk), .reset(reset), .clear(FlushE),
         .d(MemtoRegD),.q(MemtoRegE)
     );
-    floprc memwriteEreg(.clk(clk), .reset(reset), .clear(FlushE),
+    floprc #(1) memwriteEreg(.clk(clk), .reset(reset), .clear(FlushE),
         .d(MemWriteD),.q(MemWriteE)
     );
-    floprc alucontrolEreg(.clk(clk), .reset(reset), .clear(FlushE),
+    floprc #(3) alucontrolEreg(.clk(clk), .reset(reset), .clear(FlushE),
         .d(ALUControlD),.q(ALUControlE)
     );
-    floprc branchEreg(.clk(clk), .reset(reset), .clear(FlushE),
+    floprc #(1) branchEreg(.clk(clk), .reset(reset), .clear(FlushE),
         .d(BranchD),.q(BranchE)
     );
-    floprc alusrcEreg(.clk(clk), .reset(reset), .clear(FlushE),
+    floprc #(1) alusrcEreg(.clk(clk), .reset(reset), .clear(FlushE),
         .d(ALUSrcD),.q(ALUSrcE)
     );
-    floprc flagwriteEreg(.clk(clk), .reset(reset), .clear(FlushE),
-        .d(FlagWwiteD),.q(FlagWriteE)
+    floprc #(2) flagwriteEreg(.clk(clk), .reset(reset), .clear(FlushE),
+        .d(FlagWriteD),.q(FlagWriteE)
     );
-    floprc condEreg(.clk(clk), .reset(reset), .clear(FlushE),
+    floprc #(4) condEreg(.clk(clk), .reset(reset), .clear(FlushE),
         .d(CondD),.q(CondE)
     );
-    flopr flagsEreg(.clk(clk), .reset(reset),
+    flopr #(4) flagsEreg(.clk(clk), .reset(reset),
         .d(FlagsNextE),.q(FlagsE)
     );
     
@@ -118,6 +120,7 @@ module controller (
         .FlagWriteE(FlagWriteE),
         .CondE(CondE),
         .FlagsE(FlagsE),
+        .ALUFlags(ALUFlags),
         // outputs
         .BranchTakenE(BranchTakenE),
         .FlagsNextE(FlagsNextE),
@@ -127,27 +130,27 @@ module controller (
     );
 
     // ------- MEMORY ------------
-    flopr pcsrcMreg(.clk(clk), .reset(reset),
+    flopr #(1) pcsrcMreg(.clk(clk), .reset(reset),
         .d(PCSrcE_afAnd),.q(PCSrcM)
     );
-    flopr regwriteMreg(.clk(clk), .reset(reset),
+    flopr #(1) regwriteMreg(.clk(clk), .reset(reset),
         .d(RegWriteE_afAnd),.q(RegWriteM)
     );
-    flopr memtoregMreg(.clk(clk), .reset(reset),
+    flopr #(1) memtoregMreg(.clk(clk), .reset(reset),
         .d(MemtoRegE),.q(MemtoRegM)
     );
-    flopr memwriteMreg(.clk(clk), .reset(reset),
+    flopr #(1) memwriteMreg(.clk(clk), .reset(reset),
         .d(MemWriteE_afAnd),.q(MemWriteM)
     );
 
     // ------- WRITE BACK ------------
-    flopr pcsrcWreg(.clk(clk), .reset(reset),
+    flopr #(1) pcsrcWreg(.clk(clk), .reset(reset),
         .d(PCSrcM),.q(PCSrcW)
     );
-    flopr regwriteWreg(.clk(clk), .reset(reset),
+    flopr #(1) regwriteWreg(.clk(clk), .reset(reset),
         .d(RegWriteM),.q(RegWriteW)
     );
-    flopr memtoregWreg(.clk(clk), .reset(reset),
+    flopr #(1) memtoregWreg(.clk(clk), .reset(reset),
         .d(MemtoRegM),.q(MemtoRegW)
     );
 

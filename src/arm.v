@@ -4,6 +4,7 @@ module arm (
     ALUOutM,
     PCF,
     WriteDataM,
+    MemWriteM,
     ReadDataM,
     InstrD, InstrE, InstrM, InstrW
 );
@@ -19,28 +20,37 @@ module arm (
     wire [5:0] Funct;
     wire [3:0] Rd;
     wire [3:0] CondD;
+    wire [3:0] ALUFlags;
 
-    reg StallF,  StallD;
+    reg StallF, StallD;
     wire PCSrcD;
-    wire RegSrcD;
-    wire ImmSrcD;
+    wire [1:0] RegSrcD;
+    wire [1:0] ImmSrcD;
 
     reg FlushD, FlushE;
     wire ALUSrcE;
     wire BranchTakenE;
     wire [2:0] ALUControlE;
     wire ALUSrcE;
-    wire BranchTakenE;
-    reg ForwardAE, ForwardBE;
+    reg [1:0] ForwardAE, ForwardBE;
 
-    wire MemWriteM;   // for now
-    wire ReadDataM;
+    output wire MemWriteM;   // for now
 
     wire PCSrcW;
     wire RegWriteW;
     wire MemtoRegW;
 
     output wire [31:0] InstrD, InstrE, InstrM, InstrW;   // for testbench pipeline
+
+    // hazard undone -> default values:
+    always @(*) begin
+        StallF = 1'b0;
+        StallD = 1'b0;
+        FlushD = 1'b0;
+        FlushE = 1'b0;
+        ForwardAE = 2'b00;
+        ForwardBE = 2'b00;
+    end
 
     controller cll(
         .clk(clk),
@@ -50,6 +60,7 @@ module arm (
         .Rd(Rd),
         .CondD(CondD),
         .FlushE(FlushE),
+        .ALUFlags(ALUFlags),
         .RegSrcD(RegSrcD),
         .ImmSrcD(ImmSrcD),
         .BranchTakenE(BranchTakenE),
@@ -60,16 +71,6 @@ module arm (
         .RegWriteW(RegWriteW),
         .MemtoRegW(MemtoRegW)
     );
-
-    // hazard incomplete -> default values:
-    always @(*) begin
-        StallF = 0;
-        StallD = 0;
-        FlushD = 0;
-        FlushE = 0;
-        ForwardAE = 2'b00;
-        ForwardBE = 2'b00;
-    end
 
     datapath dp(
         .clk(clk),

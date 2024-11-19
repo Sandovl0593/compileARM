@@ -1,4 +1,4 @@
-`timescale 1ns / 1ps
+`timescale 1ns/1ps
 
 module testbench;
     reg clk;
@@ -6,11 +6,10 @@ module testbench;
 
     wire [31:0] WriteDataM;
     wire [31:0] DataAdrM;
-    wire MemWriteM;
     wire [31:0] InstrF;
     wire [31:0] ReadDataM;
+    wire MemWriteM;
     wire [31:0] PCF;
-    wire [3:0] ALUFlags;
 
     wire [31:0] InstrD, InstrE, InstrM, InstrW;
 
@@ -18,8 +17,8 @@ module testbench;
         .clk(clk),
         .reset(reset),
         .WriteDataM(WriteDataM),
-        .DataAdrM(DataAdrM),
         .MemWriteM(MemWriteM),
+        .DataAdrM(DataAdrM),
         .PCF(PCF),
         .InstrF(InstrF),
         .ReadDataM(ReadDataM),
@@ -46,14 +45,14 @@ module testbench;
 
 
     always @(negedge clk) begin
-        if (MemWrite)
-            if ((DataAdr === 128) & (WriteData === 254)) 
+        if (MemWriteM)
+            if ((DataAdrM === 128) & (WriteDataM === 254)) 
             begin
                 $display("Simulation succeeded");
                 #30;
                 $stop;
             end
-            else if ((DataAdr === 128) & (WriteData !== 255)) 
+            else if ((DataAdrM === 128) & (WriteDataM !== 255)) 
             begin
                 $display("Simulation failed");
                 #30;

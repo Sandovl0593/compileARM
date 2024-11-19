@@ -24,18 +24,18 @@ module condlogic (
     input wire [3:0] CondE;
     input [3:0] FlagsE;
 
-    output wire PCSrcE;
-    output wire RegWriteE;
-    output wire MemWriteE;
     output reg [3:0] FlagsNextE;
+    input wire [3:0] ALUFlags;
+    output wire PCSrcEOut;
+    output wire BranchTakenE;
+    output wire RegWriteEOut;
+    output wire MemWriteEOut;
 
-    wire [1:0] FlagWrite;
-    wire CondExE;
-
+    reg CondExE;
     wire neg, zero, carry, overflow, ge; 
     assign {neg, zero, carry, overflow} = FlagsE;
     assign ge = (neg == overflow); 
-    always @(*)
+    always @(*) begin
         case (CondE)
             4'b0000: CondExE = zero;
             4'b0001: CondExE = ~zero;
@@ -54,9 +54,10 @@ module condlogic (
             4'b1110: CondExE = 1'b1;
             default: CondExE = 1'bx;
         endcase
-
-    assign FlagsNextE[3:2] = (FlagsWriteE[1] & CondExE) ? ALUFlags[3:2] : FlagsE[3:2];
-    assign FlagsNextE[1:0] = (FlagsWriteE[0] & CondExE) ? ALUFlags[1:0] : FlagsE[1:0];
+        FlagsNextE[3:2] = (FlagWriteE[1] & CondExE) ? ALUFlags[3:2] : FlagsE[3:2];
+        FlagsNextE[1:0] = (FlagWriteE[0] & CondExE) ? ALUFlags[1:0] : FlagsE[1:0];
+    end
+    
     assign BranchTakenE = BranchE & CondExE;
 
     assign RegWriteEOut = RegWriteE & CondExE;

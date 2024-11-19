@@ -2,8 +2,8 @@ module top (
     clk,
     reset,
     WriteDataM,
-    DataAdrM, // ALUOutM from datapath
     MemWriteM,
+    DataAdrM, // ALUOutM from datapath
     PCF,
     InstrF,
     ReadDataM,
@@ -30,8 +30,8 @@ module top (
         .ReadDataM(ReadDataM),
         // outputs
         .PCF(PCF),
-        .MemWriteM(MemWriteM),
         .WriteDataM(WriteDataM),
+        .MemWriteM(MemWriteM),
         .ALUOutM(DataAdrM),
         // testbench pipeline outputs
         .InstrD(InstrD),

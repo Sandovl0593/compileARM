@@ -22,7 +22,7 @@ module datapath (
     PCF,
     InstrF,         // output testbench Instr in Fetch
       ALUOutM,
-      WriteDataM
+      WriteDataM,
 
     InstrD,         // output testbench Instr in Decode
     InstrE,         // output testbench Instr in Execute
@@ -46,6 +46,9 @@ module datapath (
     wire [31:0] PCNextF;
     wire [31:0] PCDefNextF;
     wire [31:0] PCPlus4F;
+    
+    input wire StallF, StallD, FlushD, FlushE;
+    input wire [1:0] ForwardAE, ForwardBE;
 
     output wire [31:0] InstrD;    // output Decode
     wire [31:0] PCPlus8D;
@@ -58,7 +61,7 @@ module datapath (
     wire [31:0] SrcAE;
     wire [31:0] SrcBE;
     wire [31:0] ExtImmE;
-    wire [31:0] ALUResultE
+    wire [31:0] ALUResultE;
     wire [31:0] WriteDataE;
     wire [3:0] WA3E;
     wire [31:0] RD1E, RD2E;
@@ -128,7 +131,7 @@ module datapath (
         .clk(clk),
         .we3(RegWriteW),
         .ra1(RA1D),
-        .ra2(RA2D)
+        .ra2(RA2D),
         .wa3(WA3W),
         .wd3(ResultW),
         .r15(PCPlus8D),
@@ -150,7 +153,7 @@ module datapath (
         .clk(clk), .reset(reset), .clear(FlushE),
         .d(RD2D), .q(RD2E)
     );
-    flop #(3) wa3Ereg(
+    floprc #(4) wa3Ereg(
         .clk(clk), .reset(reset), .clear(FlushE),
         .d(InstrD[15:12]), .q(WA3E)
     );
@@ -186,8 +189,8 @@ module datapath (
     alu alu(
         .a(SrcAE),
         .b(SrcBE),
-        .ALUControlE(ALUControlE),
-        .ResultW(ALUResultE),
+        .ALUControl(ALUControlE),
+        .Result(ALUResultE),
         .ALUFlags(ALUFlags)
     );
 

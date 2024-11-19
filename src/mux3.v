@@ -1,6 +1,6 @@
 module mux3(
     d0, d1, d2, s, y
-)
+);
     parameter WIDTH = 8;
     input wire [WIDTH - 1:0] d0;
     input wire [WIDTH - 1:0] d1;
