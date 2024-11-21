@@ -67,11 +67,12 @@ module controller (
     controlunit cut(
         .Op(Op), .Funct(Funct), .Rd(Rd),
         // outputs
-        .FlagWriteD(FlagWwiteD),
+        .FlagWriteD(FlagWriteD),
         .PCSrcD(PCSrcD),
         .RegWriteD(RegWriteD),
         .MemWriteD(MemWriteD),
         .MemtoRegD(MemtoRegD),
+        .BranchD(BranchD),
         .ALUSrcD(ALUSrcD),
         .ImmSrcD(ImmSrcD),
         .RegSrcD(RegSrcD),

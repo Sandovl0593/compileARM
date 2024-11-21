@@ -22,17 +22,17 @@ module arm (
     wire [3:0] CondD;
     wire [3:0] ALUFlags;
 
-    reg StallF, StallD;
+    wire StallF, StallD;
     wire PCSrcD;
     wire [1:0] RegSrcD;
     wire [1:0] ImmSrcD;
 
-    reg FlushD, FlushE;
+    wire FlushD, FlushE;
     wire ALUSrcE;
     wire BranchTakenE;
     wire [2:0] ALUControlE;
     wire ALUSrcE;
-    reg [1:0] ForwardAE, ForwardBE;
+    wire [1:0] ForwardAE, ForwardBE;
 
     output wire MemWriteM;   // for now
 
@@ -43,21 +43,19 @@ module arm (
     output wire [31:0] InstrD, InstrE, InstrM, InstrW;   // for testbench pipeline
 
     // hazard undone -> default values:
-    always @(*) begin
-        StallF = 1'b0;
-        StallD = 1'b0;
-        FlushD = 1'b0;
-        FlushE = 1'b0;
-        ForwardAE = 2'b00;
-        ForwardBE = 2'b00;
-    end
+    assign StallF =1'b0;
+       assign StallD = 1'b0;
+        assign FlushD = 1'b0;
+        assign FlushE = 1'b0;
+        assign ForwardAE = 2'b00;
+        assign ForwardBE = 2'b00;
 
     controller cll(
         .clk(clk),
         .reset(reset),
-        .Op(Op),
-        .Funct(Funct),
-        .Rd(Rd),
+        .Op(InstrD[27:26]),
+        .Funct(InstrD[25:20]),
+        .Rd(InstrD[15:12]),
         .CondD(CondD),
         .FlushE(FlushE),
         .ALUFlags(ALUFlags),

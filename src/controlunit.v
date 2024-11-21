@@ -8,6 +8,7 @@ module controlunit (
     ALUSrcD,
     ImmSrcD,
     RegSrcD,
+    BranchD,
     ALUControlD
 );
     input wire [1:0] Op;
@@ -25,7 +26,7 @@ module controlunit (
     output reg [2:0] ALUControlD; /// Changed
     
     reg [9:0] controlsD;
-    wire BranchD;   /// Changed
+    output wire BranchD;   /// Changed
     wire ALUOpD;
     
     always @(*)
