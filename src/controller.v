@@ -5,15 +5,18 @@ module controller (
     FlushE,
     ALUFlags,
     // outputs
-    RegSrcD,
-    ImmSrcD,
-      BranchTakenE,
-      ALUControlE,
-      ALUSrcE,
-        MemWriteM,
-          PCSrcW,
-          RegWriteW,
-          MemtoRegW
+    PCWrPendingF,  // for hazard detection
+      RegSrcD,
+      ImmSrcD,
+        BranchTakenE,
+        ALUControlE,
+        MemtoRegE,  // for hazard detection
+        ALUSrcE,
+          MemWriteM,
+            PCSrcW, // for hazard detection
+            RegWriteM, // for hazard detection
+            RegWriteW,
+            MemtoRegW
 );
     input wire clk;
     input wire reset;
@@ -39,7 +42,7 @@ module controller (
 
     wire PCSrcE;
     wire RegWriteE;
-    wire MemtoRegE;
+    output wire MemtoRegE; // Changed for hazard detection
     wire MemWriteE;
     output wire [2:0] ALUControlE;
     wire BranchE;
@@ -55,13 +58,15 @@ module controller (
     output wire BranchTakenE;
 
     wire PCSrcM;
-    wire RegWriteM;
+    output wire RegWriteM; // Changed for hazard detection
     wire MemtoRegM;
     output wire MemWriteM;
 
-    output wire PCSrcW;
+    // for hazard detection
+    output wire PCSrcW; // Changed for hazard detection
     output wire RegWriteW;
     output wire MemtoRegW;
+    output reg PCWrPendingF;
 
     // ------- DECODE ------------
     controlunit cut(
@@ -155,6 +160,9 @@ module controller (
         .d(MemtoRegM),.q(MemtoRegW)
     );
 
-    // Proximately: Hazard PREDICTION
-    // TO DO
+    // Hazard PREDICTION
+    always@(*) begin
+        PCWrPendingF = PCSrcD | PCSrcE | PCSrcM;
+    end
+
 endmodule

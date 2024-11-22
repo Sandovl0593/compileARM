@@ -34,7 +34,7 @@ module arm (
     wire ALUSrcE;
     wire [1:0] ForwardAE, ForwardBE;
 
-    output wire MemWriteM;   // for now
+    output wire MemWriteM;
 
     wire PCSrcW;
     wire RegWriteW;
@@ -42,13 +42,11 @@ module arm (
 
     output wire [31:0] InstrD, InstrE, InstrM, InstrW;   // for testbench pipeline
 
-    // hazard undone -> default values:
-    assign StallF =1'b0;
-       assign StallD = 1'b0;
-        assign FlushD = 1'b0;
-        assign FlushE = 1'b0;
-        assign ForwardAE = 2'b00;
-        assign ForwardBE = 2'b00;
+    // hazard variables
+    wire Match1E_M, Match1E_W, Match2E_M, Match2E_W, Match12D_E;
+    wire [1:0] ForwardAE, ForwardBE;
+    wire RegWriteM, MemtoRegE; // for hazard detection
+    wire PCWrPendingF;
 
     controller cll(
         .clk(clk),
@@ -59,6 +57,7 @@ module arm (
         .CondD(CondD),
         .FlushE(FlushE),
         .ALUFlags(ALUFlags),
+        // outputs
         .RegSrcD(RegSrcD),
         .ImmSrcD(ImmSrcD),
         .BranchTakenE(BranchTakenE),
@@ -67,7 +66,34 @@ module arm (
         .MemWriteM(MemWriteM),
         .PCSrcW(PCSrcW),
         .RegWriteW(RegWriteW),
-        .MemtoRegW(MemtoRegW)
+        .MemtoRegW(MemtoRegW),
+        // hazard detection outputs
+        .MemtoRegE(MemtoRegE),
+        .RegWriteM(RegWriteM),
+        .PCWrPendingF(PCWrPendingF)
+    );
+
+    // hazard done
+    hazardunit hz(
+        .Match1E_M(Match1E_M),
+        .Match1E_W(Match1E_W),
+        .Match2E_M(Match2E_M),
+        .Match2E_W(Match2E_W),
+        .Match12D_E(Match12D_E),
+        .BranchTakenE(BranchTakenE),
+        .MemtoRegE(MemtoRegE),
+        .RegWriteW(RegWriteW),
+        .RegWriteM(RegWriteM),
+        // outputs
+        .StallF(StallF),
+        .StallD(StallD),
+        .FlushD(FlushD),
+        .FlushE(FlushE),
+        .ForwardAE(ForwardAE),
+        .ForwardBE(ForwardBE),
+        // branch inputs
+        .PCWrPendingF(PCWrPendingF),
+        .PCSrcW(PCSrcW)
     );
 
     datapath dp(
@@ -97,7 +123,13 @@ module arm (
         .InstrD(InstrD),
         .InstrE(InstrE),
         .InstrM(InstrM),
-        .InstrW(InstrW)
+        .InstrW(InstrW),
+        // hazard detection outputs
+        .Match_1E_M(Match1E_M),
+        .Match_1E_W(Match1E_W),
+        .Match_2E_M(Match2E_M),
+        .Match_2E_W(Match2E_W),
+        .Match_12D_E(Match12D_E)
     );
 
 endmodule

@@ -27,7 +27,12 @@ module datapath (
     InstrD,         // output testbench Instr in Decode
     InstrE,         // output testbench Instr in Execute
     InstrM,         // output testbench Instr in Memory
-    InstrW          // output testbench Instr in Writeback
+    InstrW,         // output testbench Instr in Writeback
+
+    // hazard detection
+    Match_1E_M, Match_1E_W, 
+    Match_2E_M, Match_2E_W,
+    Match_12D_E
 );
     input wire clk;
     input wire reset;
@@ -65,6 +70,7 @@ module datapath (
     wire [31:0] WriteDataE;
     wire [3:0] WA3E;
     wire [31:0] RD1E, RD2E;
+    wire [3:0] RA1E, RA2E; // for hazard detection
 
     output wire [31:0] InstrM;    // output Memory
     wire [3:0] WA3M;
@@ -78,6 +84,10 @@ module datapath (
     wire [31:0] ReadDataW;
 
     wire [31:0] ResultW;
+
+    // hazard detection
+    input wire Match_1E_M, Match_1E_W;
+    input wire Match_2E_M, Match_2E_W, Match_12D_E;
 
     mux2 #(32) pcmux(
         .d0(PCPlus4F),
@@ -145,6 +155,16 @@ module datapath (
         .clk(clk), .reset(reset), .clear(FlushE),
         .d(InstrD), .q(InstrE)                // -> output InstrE to view
     );
+    // --- hazard detection
+    flopr #(4) ra1Ereg(
+        .clk(clk), .reset(reset),
+        .d(RA1D), .q(RA1E)
+    );
+    flopr #(4) ra2Ereg(
+        .clk(clk), .reset(reset),
+        .d(RA2D), .q(RA2E)
+    );
+    // --------------------
     floprc #(32) rd1Ereg(
         .clk(clk), .reset(reset), .clear(FlushE),
         .d(RD1D), .q(RD1E)
@@ -237,4 +257,14 @@ module datapath (
         .s(MemtoRegW),
         .y(ResultW)
     );
+
+    // match signals for hazard detection
+    assign Match_1E_M = (WA3M == RA1E) & (WA3M != 4'b1111);
+    assign Match_1E_W = (WA3W == RA1E) & (WA3M != 4'b1111);
+    assign Match_2E_M = (WA3M == RA2E) & (WA3M != 4'b1111);
+    assign Match_2E_W = (WA3W == RA2E) & (WA3M != 4'b1111);
+
+    assign Match12D_E = ((WA3E == RA1D) & (WA3E != 4'b1111)) | 
+                        ((WA3E == RA2D) & (WA3E != 4'b1111));
+
 endmodule
