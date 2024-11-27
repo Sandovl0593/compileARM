@@ -32,7 +32,7 @@ module datapath (
     // hazard detection
     Match_1E_M, Match_1E_W, 
     Match_2E_M, Match_2E_W,
-    Match_12D_E
+    Match12D_E
 );
     input wire clk;
     input wire reset;
@@ -77,17 +77,19 @@ module datapath (
     output wire [31:0] ALUOutM;
     input wire [31:0] ReadDataM;
     output wire [31:0] WriteDataM;
+    wire ALUSrcM;
 
     output wire [31:0] InstrW;    // output Writeback
     wire [3:0] WA3W;
     wire [31:0] ALUOutW;
     wire [31:0] ReadDataW;
+    wire ALUSrcW;
 
     wire [31:0] ResultW;
 
     // hazard detection
     input wire Match_1E_M, Match_1E_W;
-    input wire Match_2E_M, Match_2E_W, Match_12D_E;
+    input wire Match_2E_M, Match_2E_W, Match12D_E;
 
     mux2 #(32) pcmux(
         .d0(PCPlus4F),
@@ -193,14 +195,14 @@ module datapath (
         .s(ForwardAE),
         .y(SrcAE)
     );
-    mux3 #(32) wrdEmux(
+    mux3 #(32) ressrcBmux(
         .d0(RD2E),
         .d1(ResultW),
         .d2(ALUOutM),
         .s(ForwardBE),
         .y(WriteDataE)
     );
-    mux2 #(32) ressrcBmux(
+    mux2 #(32) wrdEmux(
         .d0(WriteDataE),
         .d1(ExtImmE),
         .s(ALUSrcE),
@@ -231,6 +233,10 @@ module datapath (
         .clk(clk), .reset(reset),
         .d(WA3E), .q(WA3M)
     );
+    flopr #(4) alusrcMreg(
+        .clk(clk), .reset(reset),
+        .d(ALUSrcE), .q(ALUSrcM)
+    );
 
     // out ALUOutM -> input ReadDataM from dmem
 
@@ -251,6 +257,10 @@ module datapath (
         .clk(clk), .reset(reset),
         .d(ALUOutM), .q(ALUOutW)
     );
+    flopr #(4) alusrcWreg(
+        .clk(clk), .reset(reset),
+        .d(ALUSrcM), .q(ALUSrcW)
+    );
     mux2 #(32) resmux(
         .d0(ALUOutW),
         .d1(ReadDataW),
@@ -259,12 +269,12 @@ module datapath (
     );
 
     // match signals for hazard detection
-    assign Match_1E_M = (WA3M == RA1E) & (WA3M != 4'b1111);
-    assign Match_1E_W = (WA3W == RA1E) & (WA3M != 4'b1111);
-    assign Match_2E_M = (WA3M == RA2E) & (WA3M != 4'b1111);
-    assign Match_2E_W = (WA3W == RA2E) & (WA3M != 4'b1111);
+    assign Match_1E_M = (WA3M == RA1E);
+    assign Match_1E_W = (WA3W == RA1E);
+    assign Match_2E_M = (WA3M == RA2E) & (~ALUSrcE);
+    assign Match_2E_W = (WA3W == RA2E) & (~ALUSrcE);
 
-    assign Match12D_E = ((WA3E == RA1D) & (WA3E != 4'b1111)) | 
-                        ((WA3E == RA2D) & (WA3E != 4'b1111));
+    assign Match12D_E = ((WA3E == RA1D) & (~ALUSrcE)) | 
+                        ((WA3E == RA2D) & (~ALUSrcE));
 
 endmodule

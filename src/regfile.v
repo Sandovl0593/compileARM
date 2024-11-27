@@ -16,7 +16,7 @@ module regfile (
     // OJO: en la primera parte se lee el valor en la memoria, 
     // y en la segunda parte se escribe en la memoria
     always @(negedge clk)
-        if (we3 & (wa3 != 4'b1111))
+        if (we3)
             rf[wa3] <= wd3;
 
     assign rd1 = (ra1 == 4'b1111 ? r15 : rf[ra1]);

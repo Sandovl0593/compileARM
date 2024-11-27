@@ -1,7 +1,7 @@
 from parser.encoding import *
 
 dp_binary_op = [
-    "ADD", "SUB", "AND", "ORR", "EOR", "UDIV", "SDIV"
+    "ADD", "SUB", "AND", "ORR", "EOR"
 ]
 dp_only_flags = [
     "CMP", "CMN", "TST", "TEQ"
@@ -62,7 +62,7 @@ def token_data_processing(list_of_tokens):
     elif command == "MOV":
         # -- [OP][S][cond] Rd, Operand2
         inst["Rd"] = list_of_tokens[1]
-        inst["Rn"] = '0'
+        inst["Rn"] = 'R0'
         src2 = inst["src2"] = list_of_tokens[2]
         inst["I"] = '1' if src2[0] == '#' else '0'
         inst["cmd_sh"] = 'LSL'

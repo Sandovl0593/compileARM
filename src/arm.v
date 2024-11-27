@@ -54,7 +54,7 @@ module arm (
         .Op(InstrD[27:26]),
         .Funct(InstrD[25:20]),
         .Rd(InstrD[15:12]),
-        .CondD(CondD),
+        .CondD(InstrD[31:28]),
         .FlushE(FlushE),
         .ALUFlags(ALUFlags),
         // outputs
@@ -129,7 +129,7 @@ module arm (
         .Match_1E_W(Match1E_W),
         .Match_2E_M(Match2E_M),
         .Match_2E_W(Match2E_W),
-        .Match_12D_E(Match12D_E)
+        .Match12D_E(Match12D_E)
     );
 
 endmodule

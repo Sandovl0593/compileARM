@@ -38,9 +38,15 @@ module controlunit (
                     controlsD =      10'b0000001001;
             2'b01:
                 if (Funct[0])
-                    controlsD =      10'b0001111000;
+                    if (~Funct[5])
+                        controlsD =  10'b0001111000;
+                    else
+                        controlsD =  10'b0001011000;
                 else
-                    controlsD =      10'b1001110100;
+                    if (~Funct[5])
+                        controlsD =  10'b1001110100;
+                    else
+                        controlsD =  10'b1001010100;
             2'b10: controlsD =       10'b0110100010;
             default: controlsD =     10'bxxxxxxxxxx;
         endcase
@@ -55,6 +61,7 @@ module controlunit (
                 4'b0000: ALUControlD = 3'b010;
                 4'b1100: ALUControlD = 3'b011;
                 4'b0001: ALUControlD = 3'b100;  // EOR
+                4'b1101: ALUControlD = 3'b101;  // MOV 
                 default: ALUControlD = 3'bxxx;
             endcase
             FlagWriteD[1] = Funct[0];

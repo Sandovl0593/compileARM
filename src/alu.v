@@ -18,6 +18,7 @@ module alu (
         3'b010: Result = a & b;
         3'b011: Result = a | b;
         3'b100: Result = a ^ b;
+        3'b101: Result = b;
         endcase
     end
 
