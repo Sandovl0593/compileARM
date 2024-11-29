@@ -1,22 +1,23 @@
 module hazardunit (
-    // clk, reset,
-    Match1E_M, Match1E_W, Match2E_M, Match2E_W, Match12D_E,
-    BranchTakenE,
-    MemtoRegE, RegWriteW, RegWriteM,
-    StallF, StallD, FlushD, FlushE, ForwardAE, ForwardBE,
-    // branch inputs
-    PCWrPendingF, PCSrcW
+    input wire Match1E_M, Match1E_W, Match2E_M, Match2E_W, Match12D_E,
+    input wire BranchTakenE,
+    input wire MemtoRegE, RegWriteW, RegWriteM, PCWrPendingF, PCSrcW,
+    input wire PredictTaken,  // Salida del predictor
+    input wire BranchTaken,   // Resultado real del branch
+    output wire StallF, StallD, FlushD, FlushE,
+    output reg [1:0] ForwardAE, ForwardBE
 );
 
-    // input wire clk, reset;
-    input wire Match1E_M, Match1E_W, Match2E_M, Match2E_W, Match12D_E;
-    input wire BranchTakenE;
-    input wire MemtoRegE, RegWriteW, RegWriteM;   // datapath inputs
-    input wire PCWrPendingF, PCSrcW;   // branch inputs
-    
-    output wire StallF, StallD;
-    output wire FlushD, FlushE;
-    output reg [1:0] ForwardAE, ForwardBE;
+    wire LDRStall;
+    assign LDRStall = Match12D_E & MemtoRegE;
+
+    // Stall logic
+    assign StallD = LDRStall;
+    assign StallF = LDRStall | PCWrPendingF;
+
+    // Flush logic: manejar branches incorrectos
+    assign FlushD = (PredictTaken != BranchTaken) | PCSrcW | PCWrPendingF;
+    assign FlushE = LDRStall | BranchTakenE;
 
     // Forwarding logic
     always@(*) begin
@@ -34,13 +35,4 @@ module hazardunit (
         else
             ForwardBE = 2'b00;
     end
-
-    wire LDRStall;
-    // Stall logic
-    assign LDRStall = Match12D_E & MemtoRegE;
-    assign StallD = LDRStall;
-    assign StallF = LDRStall | PCWrPendingF;
-    assign FlushD = PCWrPendingF | PCSrcW | BranchTakenE;
-    assign FlushE = LDRStall | BranchTakenE;
-
 endmodule

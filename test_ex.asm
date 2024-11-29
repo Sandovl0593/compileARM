@@ -23,3 +23,52 @@ ADD R2, R0, #13         // shouldn't happen
 ADD R2, R0, #10         // shouldn't happen
 STR R2, [R0, #100]      // mem[100] = 7
 END:
+
+
+
+//
+//algoritmo de recursividad que utilice varios tipos de branch
+
+//fibonacci:
+def fibonacci_iterativo(n):
+    if n <= 0:
+        return "El número debe ser mayor o igual a 1."
+    elif n == 1:
+        return 0
+    elif n == 2:
+        return 1
+
+    a, b = 0, 1  # Los dos primeros números de Fibonacci
+    for _ in range(2, n):
+        a, b = b, a + b
+    return b
+
+# Ejemplo de uso
+n = int(input("Introduce el número n para calcular Fibonacci: "))
+print(f"El número de Fibonacci en la posición {n} es: {fibonacci_iterativo(n)}")
+
+
+//assembly
+
+R1 = 0, R2 = 1, R3 = i, R4 = n
+
+MOV R1, #0
+MOV R2, #1
+FUNCT
+    //IF STATEMENT 
+    CMP  R4, #0
+    SIGNO BFUNT 
+    CMP  R4, #1
+    BEQ BFUNCT
+    CMP R4,#2
+    SIGNO BFUNCT
+     
+        FOR: 
+            array = 0x60000
+            LDR R1,[2]
+            CMP R4, R1
+            BFOR
+            ADD R5, R1, R2
+
+        END
+END
