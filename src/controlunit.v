@@ -98,7 +98,7 @@ module controlunit (
                 5'b11011: ALUControlD = 6'b111011;  // ASR
                 5'b11100: ALUControlD = 6'b111100;  // LSL
                 5'b11101: ALUControlD = 6'b111101;  // ROR
-                5'b11110: ALUControlD = 6'b111110;  // RRX
+                5'b11110: ALUControlD = 6'b111110;  // RRXs
                 default:  ALUControlD = 6'bxxxxxx;
             endcase
             FlagWriteD[1] = setFlags;
