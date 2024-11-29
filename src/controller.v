@@ -1,7 +1,8 @@
 module controller (
     clk, reset,
-    Op, Funct, Rd,
-    CondD,
+    // Op, Funct, Rd,
+    InstrD,
+    // CondD,
     FlushE,
     ALUFlags,
     // outputs
@@ -20,17 +21,18 @@ module controller (
 );
     input wire clk;
     input wire reset;
-    input wire [1:0] Op;
-    input wire [5:0] Funct;
-    input wire [3:0] Rd;
-    input wire [3:0] CondD;
+    // input wire [1:0] Op;
+    // input wire [5:0] Funct;
+    // input wire [3:0] Rd;
+    input wire [31:0] InstrD;
+    wire [3:0] CondD;
     input wire [3:0] ALUFlags;
 
     wire PCSrcD;
     wire RegWriteD; 
     wire MemtoRegD;
     wire MemWriteD;
-    wire [2:0] ALUControlD;
+    wire [5:0] ALUControlD;
     wire BranchD;  
     wire ALUSrcD;
     wire [1:0] FlagWriteD;
@@ -44,7 +46,7 @@ module controller (
     wire RegWriteE;
     output wire MemtoRegE; // Changed for hazard detection
     wire MemWriteE;
-    output wire [2:0] ALUControlE;
+    output wire [5:0] ALUControlE;
     wire BranchE;
     output wire ALUSrcE;
     wire [1:0] FlagWriteE;
@@ -68,9 +70,12 @@ module controller (
     output wire MemtoRegW;
     output reg PCWrPendingF;
 
+    assign condD = InstrD[31:28];
+
     // ------- DECODE ------------
     controlunit cut(
-        .Op(Op), .Funct(Funct), .Rd(Rd),
+        // .Op(Op), .Funct(Funct), .Rd(Rd),
+        .InstrD(InstrD),
         // outputs
         .FlagWriteD(FlagWriteD),
         .PCSrcD(PCSrcD),
@@ -160,7 +165,6 @@ module controller (
         .d(MemtoRegM),.q(MemtoRegW)
     );
 
-    // Hazard PREDICTION
     always@(*) begin
         PCWrPendingF = PCSrcD | PCSrcE | PCSrcM;
     end

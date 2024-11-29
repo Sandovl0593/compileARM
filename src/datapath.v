@@ -40,7 +40,7 @@ module datapath (
     input wire RegWriteW;
     input wire [1:0] ImmSrcD;
     input wire ALUSrcE;
-    input wire [2:0] ALUControlE;
+    input wire [5:0] ALUControlE;
     input wire MemtoRegW;
     input wire PCSrcW;
 
@@ -91,13 +91,14 @@ module datapath (
     input wire Match_1E_M, Match_1E_W;
     input wire Match_2E_M, Match_2E_W, Match12D_E;
 
+    // ----------  selector with branch prediction in PCSrcW
     mux2 #(32) pcmux(
         .d0(PCPlus4F),
         .d1(ResultW),
         .s(PCSrcW),
         .y(PCNextF)
     );
-    mux2 #(32) pcdefmux(
+    mux2 #(32) branchmux(
         .d0(PCNextF),
         .d1(ALUResultE),
         .s(BranchTakenE),

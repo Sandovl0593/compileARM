@@ -1,10 +1,10 @@
 module alu (
     input [31:0]        a,
     input [31:0]        b,
-    input [2:0]         ALUControl,
+    input [5:0]         ALUControl,
     output reg [31:0]   Result,
     output wire [3:0]   ALUFlags
-);
+)5
     wire  neg, zero, carry, overflow;
     wire [31:0] condinvb;
     wire [32:0] sum;

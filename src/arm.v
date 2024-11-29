@@ -30,7 +30,7 @@ module arm (
     wire FlushD, FlushE;
     wire ALUSrcE;
     wire BranchTakenE;
-    wire [2:0] ALUControlE;
+    wire [5:0] ALUControlE;
     wire ALUSrcE;
     wire [1:0] ForwardAE, ForwardBE;
 
@@ -48,13 +48,16 @@ module arm (
     wire RegWriteM, MemtoRegE; // for hazard detection
     wire PCWrPendingF;
 
+    wire predTaken; // for branch predictor
+
     controller cll(
         .clk(clk),
         .reset(reset),
-        .Op(InstrD[27:26]),
-        .Funct(InstrD[25:20]),
-        .Rd(InstrD[15:12]),
-        .CondD(InstrD[31:28]),
+        // .Op(InstrD[27:26]),
+        // .Funct(InstrD[25:20]),
+        // .Rd(InstrD[15:12]),
+        .InstrD(InstrD),
+        // .CondD(InstrD[31:28]),
         .FlushE(FlushE),
         .ALUFlags(ALUFlags),
         // outputs
@@ -96,6 +99,15 @@ module arm (
         .PCSrcW(PCSrcW)
     );
 
+    // Branch predictor
+    brpredict bp(
+        .clk(clk),
+        .reset(reset),
+        .taken(BranchTakenE),
+        .out_taken(predTaken)
+    );
+    assign PCSrcW = predTaken; // salto
+
     datapath dp(
         .clk(clk),
         .reset(reset),
@@ -131,5 +143,6 @@ module arm (
         .Match_2E_W(Match2E_W),
         .Match12D_E(Match12D_E)
     );
+
 
 endmodule
